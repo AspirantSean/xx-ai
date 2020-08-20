@@ -1,0 +1,43 @@
+node_modules/
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.DS_Store
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+.metadata
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+*.class
+Test.java
+node_modules
+main.log
+logs
+ip.repuatation
+
+/ai-boot/conf/*.save
+
+ai-ui
+ai-boot/src/test
+*.log
+package-lock.json
+/ai-boot/dbapp
+ai-boot/conf/db/test
+
