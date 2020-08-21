@@ -1,0 +1,12 @@
+#首行留空，一行一个，可以是文件夹，相对路径
+application.properties
+global.properties
+gloal.properties
+*.save
+logback.xml
+logback.xml-back
+logback.xml-file
+log4j.properties
+nationalregions
+modules.filter
+correlation

@@ -12,4 +12,110 @@
     <artifactId>ai-package</artifactId>
     <description>打包、启动、更新脚本</description>
 
+
+    <properties>
+        <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
+    </properties>
+
+    <scm>
+        <connection>scm:git:http://gitlab.info.dbappsecurity.com.cn/ethan.feng/web.git</connection>
+        <url>http://gitlab.info.dbappsecurity.com.cn/ethan.feng/web.git</url>
+    </scm>
+
+    <!--<dependencies>-->
+        <!--<dependency>-->
+            <!--<groupId>com.dbapp.app.ai</groupId>-->
+            <!--<artifactId>bdweb-common</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.dbapp.app.ai</groupId>-->
+            <!--<artifactId>bdweb-mirror</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
+    <!--</dependencies>-->
+
+    <build>
+        <finalName>bigdata-web-${tag}-${buildNumber}_${web_version}-${maven.build.timestamp}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                        <configuration>
+                            <shortRevisionLength>8</shortRevisionLength>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>package-artifacts-in-one</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>logsaas-web-${tag}-${buildNumber}_${web_version}-${maven.build.timestamp}</finalName>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <mainClass>com.dbapp.LogsaasWebApplication</mainClass>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                </manifest>
+                                <manifestEntries>
+                                    <Product-Title>DBAppSecurity BigData Web</Product-Title>
+                                    <Product-Vendor>DBAppSecurity</Product-Vendor>
+                                </manifestEntries>
+                            </archive>
+                            <descriptors>
+                                <descriptor>src/main/assembly/package.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>create-installer-distribution</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>xls</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>xlsx</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>doc</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>docx</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
