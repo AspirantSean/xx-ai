@@ -6,7 +6,7 @@ export LC_ALL=zh_CN.UTF-8
 
 NOHUP=${NOHUP:=$(which nohup)}
 
-mainclass="com.dbapp.LogsaasWebApplication"
+mainclass="com.dbapp.app.ai.AiApp"
 
 setting_java_env() {
         if [ "x$JAVA_HOME" = "x" ]; then
