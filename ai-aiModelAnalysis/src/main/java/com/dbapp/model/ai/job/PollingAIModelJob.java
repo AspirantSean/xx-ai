@@ -1,7 +1,7 @@
 package com.dbapp.model.ai.job;
 
+import com.dbapp.app.mirror.dto.AIModel;
 import com.dbapp.model.ai.api.service.IBigdataService;
-import com.dbapp.model.ai.entity.AIModel;
 import com.dbapp.model.ai.management.AIModelManager;
 import com.dbapp.model.ai.mapper.AIAnomalyAnalysisMapper;
 import lombok.extern.slf4j.Slf4j;

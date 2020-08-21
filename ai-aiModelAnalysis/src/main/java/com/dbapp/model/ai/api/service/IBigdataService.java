@@ -1,7 +1,7 @@
 package com.dbapp.model.ai.api.service;
 
-import com.dbapp.model.ai.entity.AIModel;
-import com.dbapp.model.ai.entity.MetricInfo;
+import com.dbapp.app.mirror.dto.AIModel;
+import com.dbapp.app.mirror.dto.MetricInfo;
 
 import java.util.List;
 

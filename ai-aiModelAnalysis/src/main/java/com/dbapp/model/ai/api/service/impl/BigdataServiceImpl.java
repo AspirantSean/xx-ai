@@ -1,10 +1,11 @@
 package com.dbapp.model.ai.api.service.impl;
 
-import com.dbapp.model.ai.api.BigdataServiceApi;
+import com.dbapp.app.mirror.dto.AIModel;
+import com.dbapp.app.mirror.dto.MetricInfo;
+import com.dbapp.app.mirror.rpc.IBaasClient;
+import com.dbapp.app.mirror.rpc.IMetricClient;
 import com.dbapp.model.ai.api.invoker.BigdataInvoker;
 import com.dbapp.model.ai.api.service.IBigdataService;
-import com.dbapp.model.ai.entity.AIModel;
-import com.dbapp.model.ai.entity.MetricInfo;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -14,12 +15,16 @@ import java.util.List;
 @Service
 public class BigdataServiceImpl implements IBigdataService {
 
+
     @Resource
-    private BigdataServiceApi bigdataServiceApi;
+    private IBaasClient iBaasClient;
+
+    @Resource
+    private IMetricClient iMetricClient;
 
     @Override
     public List<AIModel> getAIModelList() {
-        List<AIModel> data = BigdataInvoker.invoke(() -> bigdataServiceApi.getAIModelList());
+        List<AIModel> data = BigdataInvoker.invoke(() -> iBaasClient.getAIModelList());
         if (data == null) {
             return new ArrayList<>();
         } else {
@@ -29,7 +34,7 @@ public class BigdataServiceImpl implements IBigdataService {
 
     @Override
     public MetricInfo getMetricInfo(String metricId, long startTime, long endTime) {
-        return BigdataInvoker.invoke(() -> bigdataServiceApi.getMetricInfo(metricId, startTime, endTime));
+        return BigdataInvoker.invoke(() -> iMetricClient.getMetricInfo(metricId, startTime, endTime));
     }
 
 }

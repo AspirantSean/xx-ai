@@ -1,6 +1,6 @@
 package com.dbapp.model.ai.api.exception;
 
-import com.dbapp.model.ai.api.response.BigdataResponse;
+import com.dbapp.app.mirror.response.BigdataResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

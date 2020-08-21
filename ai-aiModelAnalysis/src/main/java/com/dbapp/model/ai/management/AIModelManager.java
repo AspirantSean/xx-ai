@@ -1,6 +1,6 @@
 package com.dbapp.model.ai.management;
 
-import com.dbapp.model.ai.entity.AIModel;
+import com.dbapp.app.mirror.dto.AIModel;
 import com.dbapp.model.ai.job.AIModelAnalysisJob;
 import com.dbapp.model.ai.job.PollingAIModelJob;
 import com.dbapp.model.ai.management.runtime.process.AIModelProcess;

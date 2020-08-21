@@ -1,8 +1,8 @@
 package com.dbapp.model.ai.api.invoker;
 
 import com.alibaba.fastjson.JSON;
+import com.dbapp.app.mirror.response.BigdataResponse;
 import com.dbapp.model.ai.api.exception.BigdataException;
-import com.dbapp.model.ai.api.response.BigdataResponse;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.slf4j.Logger;

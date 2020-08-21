@@ -1,7 +1,7 @@
 package com.dbapp.model.ai.utils;
 
+import com.dbapp.app.mirror.dto.MetricInfo;
 import com.dbapp.es.IEsService;
-import com.dbapp.model.ai.entity.MetricInfo;
 import com.google.common.collect.ImmutableMap;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;

@@ -1,6 +1,6 @@
 package com.dbapp.model.ai.management.runtime.process;
 
-import com.dbapp.model.ai.entity.AIModel;
+import com.dbapp.app.mirror.dto.AIModel;
 import com.dbapp.utils.SystemProperUtil;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
