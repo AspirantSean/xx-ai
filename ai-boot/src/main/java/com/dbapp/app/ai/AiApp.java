@@ -37,6 +37,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class AiApp {
     private static final Logger LOG = LoggerFactory.getLogger(AiApp.class);
 
+    static {
+        //springboot2.X，redis和es存在冲突，加参数解决
+        System.setProperty("es.set.netty.runtime.available.processors","false");
+    }
+
     public static void main(String[] args) {
         GlobalAttribute.init();
         SpringApplication.run(AiApp.class, args);
