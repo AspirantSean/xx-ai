@@ -24,7 +24,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>src/bin</directory>
+            <directory>src/main/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
