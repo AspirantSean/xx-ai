@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.dbapp.rpc</groupId>
             <artifactId>ailpha-base-rpc</artifactId>
-            <version>3.6.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
