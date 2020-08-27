@@ -15,6 +15,7 @@
 
     <properties>
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
+        <name-prefix>ai</name-prefix>
     </properties>
 
     <scm>
@@ -22,21 +23,16 @@
         <url>http://gitlab.info.dbappsecurity.com.cn/ethan.feng/web.git</url>
     </scm>
 
-    <!--<dependencies>-->
-        <!--<dependency>-->
-            <!--<groupId>com.dbapp.app.ai</groupId>-->
-            <!--<artifactId>bdweb-common</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>com.dbapp.app.ai</groupId>-->
-            <!--<artifactId>bdweb-mirror</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
-    <!--</dependencies>-->
+    <dependencies>
+        <dependency>
+            <groupId>com.dbapp.app.ai</groupId>
+            <artifactId>ai-boot</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
-        <finalName>bigdata-web-${tag}-${buildNumber}_${web_version}-${maven.build.timestamp}</finalName>
+        <finalName>ailpha-app-${name-prefix}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -71,7 +67,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>logsaas-web-${tag}-${buildNumber}_${web_version}-${maven.build.timestamp}</finalName>
+                            <finalName>ailpha-app-${name-prefix}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
@@ -79,12 +75,12 @@
                                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                                 <manifestEntries>
-                                    <Product-Title>DBAppSecurity BigData Web</Product-Title>
-                                    <Product-Vendor>DBAppSecurity</Product-Vendor>
+                                    <Product-Title>DAS-Security Ailpha APP</Product-Title>
+                                    <Product-Vendor>DAS-Security</Product-Vendor>
                                 </manifestEntries>
                             </archive>
                             <descriptors>
-                                <descriptor>src/main/assembly/package.xml</descriptor>
+                                <descriptor>src/assembly/package.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
@@ -96,7 +92,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                                <descriptor>src/assembly/bin.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

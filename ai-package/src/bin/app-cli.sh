@@ -145,13 +145,13 @@ start() {
 }
 
 killAIProcess() {
-    if [ ! -f $MIRROR_HOME/system/aiProcess.record ]; then
+    if [ ! -f $MIRROR_HOME/conf/aiProcess.record ]; then
         return 1
     fi
     separator='='
     while read line
     do
-        sed -i "s#$line# #g" $MIRROR_HOME/system/aiProcess.record
+        sed -i "s#$line# #g" $MIRROR_HOME/conf/aiProcess.record
         if [[ ! $line =~ $separator ]]
         then
             continue
@@ -164,7 +164,7 @@ killAIProcess() {
         fi
         kill -9 $value
         echo "$line is killed"
-    done < $MIRROR_HOME/system/aiProcess.record
+    done < $MIRROR_HOME/conf/aiProcess.record
     return 0
 }
 

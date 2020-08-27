@@ -15,13 +15,13 @@
     <version>1.0</version>
     <modules>
         <module>ai-api</module>
-        <module>ai-boot</module>
         <module>ai-package</module>
         <module>ai-provider</module>
         <module>ai-rpc</module>
         <module>ai-web</module>
         <module>ai-common</module>
         <module>ai-aiModelAnalysis</module>
+        <module>ai-boot</module>
     </modules>
 
     <properties>

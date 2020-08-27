@@ -27,7 +27,7 @@ echo "[`date +%Y-%m-%d' '%H:%M:%S`] 开始备份" >> $det_mirror_home/update.log
 cp -rf $det_mirror_home/bin /data/backup/$date/mirror-web-api/
 cp -rf $det_mirror_home/conf /data/backup/$date/mirror-web-api/
 cp -rf $det_mirror_home/lib /data/backup/$date/mirror-web-api/
-cp -rf $det_mirror_home/system /data/backup/$date/mirror-web-api/
+cp -rf $det_mirror_home/conf /data/backup/$date/mirror-web-api/
 echo "[`date +%Y-%m-%d' '%H:%M:%S`] 结束备份" >> $det_mirror_home/update.log
 base1=$(cd `dirname $0`; pwd)
 echo $base1 >> $det_mirror_home/update.log
@@ -49,9 +49,9 @@ nowVar=`ls $base/lib/logsaas*`
 nowVar=${nowVar##*/}
 echo 'lastVerson:'$lastVar',nowVerson:'$nowVar  >> $det_mirror_home/update.log
 
-rm -rf $det_mirror_home/system
+rm -rf $det_mirror_home/conf
 echo "[`date +%Y-%m-%d' '%H:%M:%S`] 删除system完成" >> $det_mirror_home/update.log
-\cp -rf $base/system $det_mirror_home
+\cp -rf $base/conf $det_mirror_home
 echo 'copy system/ to '$det_mirror_home/ >> $det_mirror_home/update.log
 echo "[`date +%Y-%m-%d' '%H:%M:%S`] 复制system/完成" >> $det_mirror_home/update.log
 
@@ -71,12 +71,12 @@ else
 fi
 
 if [ -z `$det_mirror_home/python2.7/bin/python $det_mirror_home/python2.7/bin/pip list --format columns|awk 'NR>2{print $1}'|grep "statsmodels"` ]; then
-    unzip -o -d $det_mirror_home/python2.7/lib/python2.7/site-packages $det_mirror_home/system/ai_model_ailpha/config/statsmodels.zip
+    unzip -o -d $det_mirror_home/python2.7/lib/python2.7/site-packages $det_mirror_home/conf/ai_model_ailpha/config/statsmodels.zip
 fi
 
 if [ -z `command -v cpulimit` ]; then
     echo 'cpulimit does not exist, unzip its into '$det_mirror_home >> $det_mirror_home/update.log
-    unzip -o -d $det_mirror_home $det_mirror_home/system/cpulimit-master.zip
+    unzip -o -d $det_mirror_home $det_mirror_home/conf/cpulimit-master.zip
     echo 'install cpulimit, and create symlink into /usr/bin/cpulimit' >> $det_mirror_home/update.log
     cd $det_mirror_home/cpulimit-master
     make

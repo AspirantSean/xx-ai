@@ -31,8 +31,8 @@ public class AIModelAnalysisJob implements Job {
     /*
      * 文件/目录路径
      */
-    private static final String ALGORITHM_CONF_PATH = String.format("%s/ai_model_ailpha/config/ai_algorithm.properties", SystemProperUtil.getSysPath());
-    private static final String PYTHON_PATH = String.format("%s/ai_model_ailpha/Analysis.py", SystemProperUtil.getSysPath());
+    private static final String ALGORITHM_CONF_PATH = String.format("%s/ai_model_ailpha/config/ai_algorithm.properties", SystemProperUtil.getConfPath());
+    private static final String PYTHON_PATH = String.format("%s/ai_model_ailpha/Analysis.py", SystemProperUtil.getConfPath());
     private static final String CACHE_PATH = GlobalAttribute.getPropertyString("tmp.dir", "/data/tmp");
 
     @Resource

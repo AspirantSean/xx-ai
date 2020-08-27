@@ -31,7 +31,7 @@ public class AIModelProcess {
     private static File recordFile;
 
     static {
-        recordFile = new File(SystemProperUtil.getSysPath() + SystemProperUtil.getFileSeparator() + "aiProcess.record");
+        recordFile = new File(SystemProperUtil.getConfPath() + SystemProperUtil.getFileSeparator() + "aiProcess.record");
         if (!recordFile.exists()) {
             try {
                 recordFile.createNewFile();
