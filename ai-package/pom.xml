@@ -15,7 +15,7 @@
 
     <properties>
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
-        <name-prefix>ai</name-prefix>
+        <project.name>ai</project.name>
     </properties>
 
     <scm>
@@ -32,7 +32,7 @@
     </dependencies>
 
     <build>
-        <finalName>ailpha-app-${name-prefix}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
+        <finalName>ailpha-app-${project.name}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -67,11 +67,11 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>ailpha-app-${name-prefix}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
+                            <finalName>ailpha-app-${project.name}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>com.dbapp.app.ai.AiApp</mainClass>
+                                    <mainClass>com.dbapp.app.ai.AppApplication</mainClass>
                                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                                 <manifestEntries>

@@ -6,228 +6,276 @@ export LC_ALL=zh_CN.UTF-8
 
 NOHUP=${NOHUP:=$(which nohup)}
 
-mainclass="com.dbapp.app.ai.AiApp"
+#-------------程序方法实现--------------#
 
+#java环境变量配置方法
 setting_java_env() {
-        if [ "x$JAVA_HOME" = "x" ]; then
-                export JAVA_HOME=/usr/local/jdk
-        fi
-        export PATH=$JAVA_HOME/bin:$PATH
-        export PATH=/sbin:$PATH
-        export PATH=/usr/sbin:$PATH
-        export PATH=/bin:$PATH
-
-        #set jvm setting for heap size
-        JAVA_OPTS="-Xms6G -Xmx6G -XX:MaxPermSize=256m -Djava.awt.headless=true "
-
-        #set jvm setting: enable script(restart) when OOM
-        #JAVA_OPTS="$JAVA_OPTS -XX:OnOutOfMemoryError=\"$PROFILE_HOME/bin/oom.sh\" "
-
-        #set jvm setting: enable heap dump when OOM
-        #JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data"
-
-        #set jvm setting: compress ordinary object pointer, disable by default
-        JAVA_OPTS="$JAVA_OPTS -XX:+UseCompressedOops "
-
-        #set jvm setting: print gc
-        JAVA_OPTS="$JAVA_OPTS -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps "
-
-        #set jvm setting: enable jmx remote profiling, MUST change the java.rmi.server.hostname
-        #JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=12345 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=127.0.0.1 "
-
-        #JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=9832 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9832 -Djava.rmi.server.hostname=192.168.30.193 -Djgroups.bind_addr=172.18.0.7 -Djava.rmi.server.logCalls=true "
-
-        #JAVA_OPTS="$JAVA_OPTS -Djava.util.logging.config.file=$PROFILE_HOME/conf/logging.properties"
-
-        JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir=/var/tmp"
-
-        # TODO make sure java version is 1.6 or above
-}
-
-setting_mirror_evn() {
-        cd `dirname $0`/.. 1>/dev/null 2>&1
-        base=`pwd`
-        export MIRROR_HOME=$base
-
-
-        #test conf exist
-        if [ ! -d $MIRROR_HOME/conf ]; then
-                echo "[`date +%Y-%m-%d' '%H:%M:%S`] $MIRROR_HOME/conf not exist, exit"
-                exit 1
-        fi
-
-        CLASSPATH=$MIRROR_HOME/conf
-        LIB_DIR=$MIRROR_HOME/lib
-        WEB_DIR=$MIRROR_HOME/web
-        for i in `ls $LIB_DIR 2>/dev/null`; do
-                CLASSPATH=$CLASSPATH:$LIB_DIR/$i:$WEB_DIR
-        done
-        export CLASSPATH
-}
-
-setting_mirror_evn
-
-setting_java_env
-
-#####change by zhenjie.wang#####
-function is_file_contain_key() {
-  file=$1
-  key=$2
-  is_contain=0
-  while read line
-  do
-    if [[ $line =~ $key ]]; then
-      is_contain=1
-      break
+    if [[ -z "$JAVA_HOME" ]]; then
+        export JAVA_HOME=/usr/local/jdk
     fi
-  done < $file
-  echo $is_contain
+    export PATH=$JAVA_HOME/bin:$PATH
+    export PATH=/sbin:$PATH
+    export PATH=/usr/sbin:$PATH
+    export PATH=/bin:$PATH
+
+    #set jvm setting for heap size
+    JAVA_OPTS="-Xms1G -Xmx1G -Xss1m -Djava.awt.headless=true "
+
+    #set jvm setting: enable script(restart) when OOM
+    #JAVA_OPTS="$JAVA_OPTS -XX:OnOutOfMemoryError=\"$PROFILE_HOME/bin/oom.sh\" "
+
+    #set jvm setting: enable heap dump when OOM
+    #JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data"
+
+    #set jvm setting: compress ordinary object pointer, disable by default
+    JAVA_OPTS="$JAVA_OPTS -XX:+UseCompressedOops "
+
+    #set jvm setting: print gc
+    JAVA_OPTS="$JAVA_OPTS -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps "
+
+    JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir=/var/tmp"
+
+    # TODO make sure java version is 1.6 or above
 }
 
-cronTask(){
-    file=$2'cron'
-    crontab -l > $file
-    key="ai-cli.sh"
-    is_contain=`is_file_contain_key $file "$key"`
+#app环境变量配置方法
+setting_ailpha_app_evn() {
+    #进入bin的上级目录
+    cd `dirname $0`/.. 1>/dev/null 2>&1
+    base=`pwd`
+    export APP_HOME=$base
 
-    case $1 in
-         add)
-           if [ $is_contain = 0 ]; then
-                echo "*/1 * * * * $2$key start >>/var/log/mirror_check.log" >> $file
-           fi
-         ;;
-         del)
-          if [ $is_contain != 0 ]; then
-                 sed -i '/'"$key"'/d' $file
-           fi
-         ;;
-         *)
-           echo "nothing..."
-         ;;
-    esac
-    crontab $file
-    rm -rf $file
+    #test conf exist
+    if [ ! -d $APP_HOME/conf ]; then
+        echo "[`date +%Y-%m-%d' '%H:%M:%S`] $APP_HOME/conf not exist, exit"
+        exit 1
+    fi
+
+    CLASSPATH=$APP_HOME/conf:$APP_HOME/web
+    for i in `ls $APP_HOME/lib 2>/dev/null`; do
+        CLASSPATH=$CLASSPATH:$APP_HOME/lib/$i
+    done
+
+    export CLASSPATH
 }
 
+#启动方法
 start() {
-	origin_pid=`ps -ef | grep $mainclass | grep -v grep | awk '{print $2}'`
+    origin_pid=`get_pid`
 
-	if [ ! "x$origin_pid" == "x" ]; then
+    #判断是否已启动
+    if [[ -n "$origin_pid" ]]; then
         echo $origin_pid > /var/run/web.pid
-		echo "mirror process has already been running,quit"
-		exit 1;
-	fi
-	
-	cronTask 'add' $MIRROR_HOME'/bin/'
-
-	jar_file=""
-	for i in `ls $MIRROR_HOME/*.jar 2>/dev/null`; do
-                #CLASSPATH=$CLASSPATH:$LIB_DIR/$i
-		jar_file=$i
-        done
-	
-	if [ ! -d $MIRROR_HOME/logs ]; then
-         mkdir $MIRROR_HOME/logs
+        echo "Ailpha App process has started already"
+        exit 1;
     fi
 
-	#java $JAVA_OPTS -jar $jar_file 1>logs/console.log 2>&1 &
-	java $JAVA_OPTS $mainclass 1>logs/console.log 2>&1 &
-    	pid=$!
+    #日志目录
+    if [ ! -d $APP_HOME/logs ]; then
+         mkdir $APP_HOME/logs
+    fi
 
+    #启动前处理
+    pre_start
+
+    #启动程序
+    java $JAVA_OPTS $main_class 1>$APP_HOME/logs/console.log 2>&1 &
+    pid=$!
     echo $pid > /var/run/web.pid
 
-	sleep 1
-    flag=`ps ef |grep $pid |grep logsaas-web`
-    if [ ! "x$flag" == "x" ]; then
-        echo "[`date +%Y-%m-%d' '%H:%M:%S`] start mirror-web-api(product env) finished, profile's pid: $pid"
-                exit
+    sleep 1
+    flag=`ps -ef | grep $pid | grep $main_class`
+    if [[ -n "$flag" ]]; then
+        #启动后处理
+        post_start
+
+        echo "[`date +%Y-%m-%d' '%H:%M:%S`] start Ailpha App finished, profile's pid: $pid"
+        exit 0
+    else
+        echo "[`date +%Y-%m-%d' '%H:%M:%S`] failed to start Ailpha App"
+        exit 1
     fi
 }
 
-killAIProcess() {
-    if [ ! -f $MIRROR_HOME/conf/aiProcess.record ]; then
-        return 1
+#启动前处理
+pre_start() {
+    pre_start_file=$APP_HOME/bin/pre_start.sh
+    if [[ -f $pre_start_file ]]; then
+        sh $pre_start_file
     fi
-    separator='='
-    while read line
-    do
-        sed -i "s#$line# #g" $MIRROR_HOME/conf/aiProcess.record
-        if [[ ! $line =~ $separator ]]
-        then
-            continue
-        fi
-        position=`awk -v str="$line" -v subStr="$separator" 'BEGIN{print index(str,subStr)}'`
-        value=${line:$position}
-        if [[ -z $value || $value =~ "-1" ]]
-        then
-            continue
-        fi
-        kill -9 $value
-        echo "$line is killed"
-    done < $MIRROR_HOME/conf/aiProcess.record
-    return 0
 }
 
-stop(){
-	pid=`ps -ef | grep $mainclass|grep -v grep|awk '{print $2}'`
-	kill -9 $pid
-	echo "[`date +%Y-%m-%d' '%H:%M:%S`] stop mirror-web-api finished.pid:$pid"
-	killAIProcess
-	sleep 5
+#启动后处理
+post_start() {
+    post_start_file=$APP_HOME/bin/post_start.sh
+    if [[ -f $post_start_file ]]; then
+        sh $post_start_file
+    fi
 }
 
+#停止方法
+stop() {
+    pid=`get_pid`
+    if [[ -n $pid ]]; then
+        #停止前处理
+        pre_stop
 
+        kill -9 $pid
 
+        #停止后处理
+        post_stop
+        echo "[`date +%Y-%m-%d' '%H:%M:%S`] stop Ailpha App finished. pid:$pid"
+    else
+        echo "[`date +%Y-%m-%d' '%H:%M:%S`] Ailpha App has already finished"
+    fi
+}
+
+#启动前处理
+pre_stop() {
+    pre_stop_file=$APP_HOME/bin/pre_stop.sh
+    if [[ -f $pre_stop_file ]]; then
+        sh $pre_stop_file
+    fi
+}
+
+#启动后处理
+post_stop() {
+    post_stop_file=$APP_HOME/bin/post_stop.sh
+    if [[ -f $post_stop_file ]]; then
+        sh $post_stop_file
+    fi
+}
+
+#重启方法
 restart() {
-        stop
-        start
+    stop
+    start
 }
 
-
-
-usage() {
-        echo "Usage: `basename $0` (start|stop|restart|status) [-v|--verbose]"
+#状态
+status() {
+    #app名称
+    medium_app_name=${app_jar#*ailpha-app-}
+    app_name=${medium_app_name%%-*}
+    #进程号
+    pid=`get_pid`
+    #程序状态
+    status=null
+    if [[ -n "$pid" ]]; then
+        status=running
+    else
+        status="not started"
+        pid=null
+    fi
+    #程序健康度
+    health=red
+    if [[ $status == "running" ]]; then
+        health=green
+    fi
+    #输出结果
+    printf "%-15s%-15s%-15s%-15s\n" "app name" pid status health
+    echo "---------------------------------------------------"
+    printf "%-15s%-15s%-15s" "$app_name" "$pid" "$status"
+    if [[ $health == "red" ]]; then
+        echo -e "\e[1;31m$health\e[0m"
+    elif [[ $health == "green" ]]; then
+        echo -e "\e[1;32m$health\e[0m"
+    else
+        echo $health
+    fi
 }
 
+#版本号
+version() {
+    app_name=${app_jar#*ailpha-app-}
+    tag=${app_name#*-}
+    version=${tag%%-*}
+    echo $version
+}
 
-#set default value
-action=usage
-debug=0
-args=""
+#用法
+help() {
+    echo "Usage: `basename $0` (start|stop|restart|status) [-v|--version|-h|--help]"
+    echo "where options include:"
+    echo "  start           start the app"
+    echo "  stop            stop the app"
+    echo "  restart         restart the app"
+    echo "  status          get the app's status"
+    echo "  -v|--version    print app version and exit"
+    echo "  -h|--help       use help to obtain more information"
+}
 
-#process args
-while [ $# -gt 0 ]; do
-        case "$1" in
-                start|stop|restart|status)
-                        action=$1
-                        ;;
-                -v|--verbose)
-                        verbose=1
-                        ;;
-                *)
-                        args="$args $1"
-        esac
-        shift
-done
+#获取进程号
+get_pid() {
+    #进程ID
+    pid=`ps -ef | grep $main_class | grep -v grep | awk 'NR==1{print $2}'`
+    echo $pid
+}
 
+#-------------程序启动逻辑--------------#
 
-case "$action" in
-        start)
-                start
-                ;;
-        stop)
-                stop
-                ;;
-        restart)
-                restart
-                ;;
-        status)
-                status
-                ;;
+#设置Java环境变量
+setting_java_env
+#设置程序环境变量
+setting_ailpha_app_evn
+
+#程序运行jar包
+app_jar=`ls $APP_HOME/lib | grep -E "^ailpha-app.*.jar$" | awk 'NR==1{print $1}'`
+#main-class名称读取
+if [ ! -f $APP_HOME/lib/META-INF/MANIFEST.MF ]; then
+    cd $APP_HOME/lib
+    jar xf $APP_HOME/lib/$app_jar META-INF/MANIFEST.MF
+    cd $APP_HOME
+fi
+main_class=`cat $APP_HOME/lib/META-INF/MANIFEST.MF | grep "Main-Class"`
+main_class=${main_class#*Main-Class: }
+#剔除windows系统存在的换行符^M
+main_class=${main_class%%AppApplication*}"AppApplication"
+
+#默认动作
+action=""
+
+#action预处理
+if [ $# -gt 0 ]; then
+    case "$1" in
+        start|stop|restart|status)
+            action=$1
+            ;;
+        -v|--version)
+            action=version
+            ;;
+        -h|--help)
+            action=help
+            ;;
         *)
-                usage
-                ;;
+            action=$1
+            ;;
+    esac
+    shift
+fi
+
+#完成action
+case "$action" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    status)
+        status
+        ;;
+    version)
+        version
+        ;;
+    help)
+        help
+        ;;
+    *)
+        echo "no such command: "$action
+        echo "use `basename $0` -h|--help to get more information"
+        ;;
 esac
-
-
-

@@ -11,7 +11,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>
             <excludes>
-                <exclude>${groupId}:${name-prefix}-*</exclude>
+                <exclude>${groupId}:${project.name}-*</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>
@@ -26,6 +26,15 @@
         <fileSet>
             <directory>src/bin</directory>
             <outputDirectory>bin</outputDirectory>
+            <excludes>
+                <exclude>package.sh</exclude>
+            </excludes>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>src/bin</directory>
+            <outputDirectory>bin</outputDirectory>
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -36,7 +45,7 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>../${name-prefix}-boot/src/main/resources</directory>
+            <directory>../${project.name}-boot/src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
@@ -54,7 +63,7 @@
                 <include>ailpha-app-*-dist.jar</include>
             </includes>
             <excludes>
-                <exclude>${name-prefix}-*.jar</exclude>
+                <exclude>${project.name}-*.jar</exclude>
             </excludes>
         </fileSet>
     </fileSets>

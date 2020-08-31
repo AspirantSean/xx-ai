@@ -34,8 +34,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @ComponentScan(basePackages = "com.dbapp")
 @EnableDiscoveryClient
 //@EnableAilphaApp
-public class AiApp {
-    private static final Logger LOG = LoggerFactory.getLogger(AiApp.class);
+public class AppApplication {
+    private static final Logger LOG = LoggerFactory.getLogger(AppApplication.class);
 
     static {
         //springboot2.X，redis和es存在冲突，加参数解决
@@ -44,7 +44,7 @@ public class AiApp {
 
     public static void main(String[] args) {
         GlobalAttribute.init();
-        SpringApplication.run(AiApp.class, args);
+        SpringApplication.run(AppApplication.class, args);
         LOG.info("app-ai application started!");
     }
 
