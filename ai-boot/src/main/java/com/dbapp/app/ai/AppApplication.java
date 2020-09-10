@@ -15,6 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -33,6 +34,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @MapperScan({"com.dbapp.model.ai.mapper"})
 @ComponentScan(basePackages = "com.dbapp")
 @EnableDiscoveryClient
+@EnableRedisHttpSession
 //@EnableAilphaApp
 public class AppApplication {
     private static final Logger LOG = LoggerFactory.getLogger(AppApplication.class);
