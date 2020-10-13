@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
@@ -67,7 +66,7 @@ public final class GlobalAttribute {
         boolean isNotChanged = true;
         File propertiesFile = new File(path);
         try {
-            List<String> lines = FileUtils.readLines(propertiesFile, Charset.defaultCharset());
+            List<String> lines = FileUtils.readLines(propertiesFile);
             FileUtils.write(propertiesFile, "", StandardCharsets.UTF_8, false);// 清空原文件
             for (String line : lines) {
                 int index;
@@ -102,7 +101,7 @@ public final class GlobalAttribute {
         boolean isNotRemoved = true;
         File propertiesFile = new File(GLOBAL_PATH);
         try {
-            List<String> lines = FileUtils.readLines(propertiesFile, Charset.defaultCharset());
+            List<String> lines = FileUtils.readLines(propertiesFile);
             FileUtils.write(propertiesFile, "", StandardCharsets.UTF_8, false);// 清空原文件
             for (String line : lines) {
                 int index;
