@@ -9,20 +9,16 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
-           <unpack>true</unpack>
+            <unpack>true</unpack>
             <scope>runtime</scope>
             <includes>
-                <include>com.dbapp.app.ai:ai-*</include>
+                <include>${groupId}:${project.name}-*</include>
             </includes>
+            <unpackOptions>
+                <excludes>
+                    <exclude>static/**</exclude>
+                </excludes>
+            </unpackOptions>
         </dependencySet>
     </dependencySets>
-    <fileSets>
-
-        <fileSet>
-
-            <includes>
-                <include>aa</include>
-            </includes>
-        </fileSet>
-    </fileSets>
 </assembly>
