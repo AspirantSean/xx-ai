@@ -220,7 +220,7 @@ setting_java_env
 setting_ailpha_app_evn
 
 #程序运行jar包
-app_jar=`ls $APP_HOME/lib | grep -E "^ailpha-app.*.jar$" | awk 'NR==1{print $1}'`
+app_jar=`ls $APP_HOME/lib | grep -E "ailpha-app.*.jar$" | awk 'NR==1{print $1}'`
 #main-class名称读取
 if [ ! -f $APP_HOME/lib/META-INF/MANIFEST.MF ]; then
     cd $APP_HOME/lib

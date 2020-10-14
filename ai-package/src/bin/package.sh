@@ -23,7 +23,7 @@ fi
 mkdir package
 
 #将程序tar包移到package目录下
-tar_name=`ls -l *-package/target | grep -E "^ailpha-app.*.tar.gz$" | awk 'NR==1{print $9}'`
+tar_name=`ls -l *-package/target | grep -E "ailpha-app.*.tar.gz$" | awk 'NR==1{print $9}'`
 mv *-package/target/$tar_name package
 cd package
 fileMd5=`md5sum $tar_name | cut -d ' ' -f1`
