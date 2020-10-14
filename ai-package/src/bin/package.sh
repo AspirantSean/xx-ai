@@ -23,13 +23,13 @@ fi
 mkdir package
 
 #将程序tar包移到package目录下
-tar_name=`ls -l *-package/target | grep -E "ailpha-app.*.tar.gz$" | awk 'NR==1{print $9}'`
+tar_name=`ls -l *-package/target | grep -E "^ailpha-app.*.tar.gz$" | awk 'NR==1{print $9}'`
 mv *-package/target/$tar_name package
 cd package
 fileMd5=`md5sum $tar_name | cut -d ' ' -f1`
 echo $fileMd5 > md5.txt
 #打成zip包
-zip_name="${tar_name%-bin.tar.gz*}.zip"
+zip_name="${tar_name%.tar.gz*}.zip"
 if [[ -n $zip_password ]]; then
     zip -P $zip_password -r $zip_name $tar_name md5.txt
 else

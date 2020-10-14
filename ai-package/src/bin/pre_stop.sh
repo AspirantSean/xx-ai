@@ -1,15 +1,16 @@
 #!/bin/bash
 
 killAIProcess() {
+    ##进入bin的上级目录
     cd `dirname $0`/.. 1>/dev/null 2>&1
-    export APP_HOME=`pwd`
-    if [ ! -f $APP_HOME/conf/aiProcess.record ]; then
+    base=`pwd`
+    if [ ! -f $base/conf/aiProcess.record ]; then
         return 1
     fi
     separator='='
     while read line
     do
-        sed -i "s#$line# #g" $APP_HOME/conf/aiProcess.record
+        sed -i "s#$line# #g" $base/conf/aiProcess.record
         if [[ ! $line =~ $separator ]]
         then
             continue
@@ -22,7 +23,7 @@ killAIProcess() {
         fi
         kill -9 $value
         echo "$line is killed"
-    done < $APP_HOME/conf/aiProcess.record
+    done < $base/conf/aiProcess.record
     return 0
 }
 

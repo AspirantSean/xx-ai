@@ -32,12 +32,9 @@ main.log
 logs
 ip.repuatation
 
-/ai-boot/conf/*.save
-
 ai-ui
 ai-boot/src/test
 *.log
 package-lock.json
 /ai-boot/dbapp
 ai-boot/conf/db/test
-

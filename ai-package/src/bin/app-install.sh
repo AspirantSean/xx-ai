@@ -17,7 +17,7 @@ log_command_result() {
 }
 
 #------------------------------------------------安装目录------------------------------------------------
-app_home=/usr/hdp/2.5.3.0-37/bigdata/ailpha-app/ai-app
+app_home=/usr/hdp/2.5.3.0-37/bigdata/ailpha-app/ai
 
 #------------------------------------------------当前目录------------------------------------------------
 current_path=$(cd `dirname $0`/..; pwd)
@@ -96,8 +96,7 @@ if [[ $action == "update" ]]; then
             #删除配置
             if [[ $operation_type == "delete" ]]; then
                 log "移除配置项：$properties_key"
-                sed -i s#^$properties_key.*##g $properties_file
-                continue
+                sed -i s#^$properties_key.*                continue
             fi
 
             #配置内容拼装
