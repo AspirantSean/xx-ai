@@ -2,7 +2,6 @@ package com.dbapp.app.ai.management.runtime.process;
 
 import com.dbapp.app.ai.utils.SystemProperUtil;
 import com.dbapp.app.mirror.dto.AIModel;
-import com.sun.istack.internal.NotNull;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
@@ -13,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.DateBuilder;
 
+import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

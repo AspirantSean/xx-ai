@@ -8,7 +8,6 @@ import com.dbapp.app.ai.quartz.IQuartzManager;
 import com.dbapp.app.ai.utils.GlobalAttribute;
 import com.dbapp.app.mirror.dto.AIModel;
 import com.google.common.collect.ImmutableMap;
-import com.sun.istack.internal.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.DateBuilder;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
