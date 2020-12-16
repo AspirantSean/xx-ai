@@ -1,0 +1,9 @@
+{
+    "code":"ai",
+    "name":"ai server",
+    "description":"ai server",
+    "version":"${tag}",
+    "mainClass":"${app.main.class}",
+    "dockerId":"1.ai1",
+    "deployPath":"/usr/hdp/2.5.3.0-37/bigdata/ailpha-app/ai"
+}

@@ -25,6 +25,7 @@
     <properties>
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
         <project.name>ai</project.name>
+        <app.main.class>com.dbapp.app.ai.AppApplication</app.main.class>
     </properties>
 
     <build>
@@ -65,8 +66,7 @@
                             <finalName>ailpha-app-${project.name}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
                             <archive>
                                 <manifest>
-                                    <addClasspath>true</addClasspath>
-                                    <mainClass>com.dbapp.app.ai.AppApplication</mainClass>
+                                    <mainClass>${app.main.class}</mainClass>
                                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                                 <manifestEntries>

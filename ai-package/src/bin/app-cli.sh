@@ -222,15 +222,7 @@ setting_ailpha_app_evn
 #程序运行jar包
 app_jar=`ls $APP_HOME/lib | grep -E "ailpha-app.*.jar$" | awk 'NR==1{print $1}'`
 #main-class名称读取
-if [ ! -f $APP_HOME/lib/META-INF/MANIFEST.MF ]; then
-    cd $APP_HOME/lib
-    jar xf $APP_HOME/lib/$app_jar META-INF/MANIFEST.MF
-    cd $APP_HOME
-fi
-main_class=`cat $APP_HOME/lib/META-INF/MANIFEST.MF | grep "Main-Class"`
-main_class=${main_class#*Main-Class: }
-#剔除windows系统存在的换行符^M
-main_class=${main_class%%AppApplication*}"AppApplication"
+main_class=`cat $APP_HOME/conf/meta_info.data |jq -r '.mainClass'`
 
 #默认动作
 action=""
