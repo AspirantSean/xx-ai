@@ -29,7 +29,7 @@ cd package
 fileMd5=`md5sum $tar_name | cut -d ' ' -f1`
 echo $fileMd5 > md5.txt
 #打成zip包
-zip_name="${tar_name%.tar.gz*}.zip"
+zip_name="${tar_name%-bin.tar.gz*}.zip"
 if [[ -n $zip_password ]]; then
     zip -P $zip_password -r $zip_name $tar_name md5.txt
 else
