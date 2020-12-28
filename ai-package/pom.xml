@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>app-ai</artifactId>
-        <groupId>com.dbapp.app.ai</groupId>
+        <artifactId>ext-ai</artifactId>
+        <groupId>com.dbapp.extension.ai</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -16,7 +16,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.dbapp.app.ai</groupId>
+            <groupId>com.dbapp.extension.ai</groupId>
             <artifactId>ai-boot</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -25,11 +25,11 @@
     <properties>
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
         <project.name>ai</project.name>
-        <app.main.class>com.dbapp.app.ai.AppApplication</app.main.class>
+        <ext.main.class>com.dbapp.extension.ai.ExtApplication</ext.main.class>
     </properties>
 
     <build>
-        <finalName>ailpha-app-${project.name}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
+        <finalName>ailpha-ext-${project.name}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -63,14 +63,14 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>ailpha-app-${project.name}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
+                            <finalName>ailpha-ext-${project.name}-${tag}-${buildNumber}_${release.version}-${maven.build.timestamp}</finalName>
                             <archive>
                                 <manifest>
-                                    <mainClass>${app.main.class}</mainClass>
+                                    <mainClass>${ext.main.class}</mainClass>
                                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                                 <manifestEntries>
-                                    <Product-Title>DAS-Security Ailpha APP</Product-Title>
+                                    <Product-Title>DAS-Security Ailpha Extension</Product-Title>
                                     <Product-Vendor>DAS-Security</Product-Vendor>
                                 </manifestEntries>
                             </archive>

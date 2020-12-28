@@ -60,7 +60,7 @@
             <directory>target</directory>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>ailpha-app-*-dist.jar</include>
+                <include>ailpha-ext-*-dist.jar</include>
             </includes>
             <excludes>
                 <exclude>${project.name}-*.jar</exclude>
