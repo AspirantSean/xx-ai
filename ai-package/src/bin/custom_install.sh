@@ -2,7 +2,7 @@
 
 #进入bin的父目录
 base=$(cd `dirname $0`/..; pwd)
-ext_home=`cat base/conf/meta_info.data |jq -r '.deployPath'`
+ext_home=`cat $base/conf/meta_info.data |jq -r '.deployPath'`
 python_path=$ext_home/python2.7
 if [ -d $python_path ]; then
     echo 'python installed'
