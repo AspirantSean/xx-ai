@@ -12,7 +12,7 @@ public class SystemProperUtil {
 
     static {
         if (StringUtils.isEmpty(profileResource)) {
-            profileResource = System.getenv("APP_HOME") + file_separator + "conf";
+            profileResource = System.getenv("EXT_HOME") + file_separator + "conf";
         }
     }
 
