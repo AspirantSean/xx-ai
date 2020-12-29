@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * @ClassName AppApplication
+ * @ClassName ExtApplication
  * @Description 启动类
  * @Version 1.0-SNAPSHOT
  **/
@@ -16,10 +16,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
-public class AppApplication {
+public class ExtApplication {
     public static void main(String[] args) {
-        SpringApplication application = new SpringApplication(AppApplication.class);
+        SpringApplication application = new SpringApplication(ExtApplication.class);
         application.run(args);
-        System.out.println();
     }
 }
