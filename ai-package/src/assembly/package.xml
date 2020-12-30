@@ -15,9 +15,10 @@
                 <include>${groupId}:${project.name}-*</include>
             </includes>
             <unpackOptions>
-                <excludes>
-                    <exclude>static/**</exclude>
-                </excludes>
+                <includes>
+                    <include>META-INF/**</include>
+                    <include>**/*.class</include>
+                </includes>
             </unpackOptions>
         </dependencySet>
     </dependencySets>
