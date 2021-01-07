@@ -54,11 +54,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>thirdparty</id>
-            <url>http://192.168.31.133:9903/nexus/content/repositories/thirdparty/</url>
-        </repository>
-    </repositories>
 </project>
