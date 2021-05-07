@@ -22,13 +22,6 @@
             <SizeBasedTriggeringPolicy size="64MB" />
             <DefaultRolloverStrategy max="20"/>
         </RollingFile>
-
-        <RollingFile name="similarLog" fileName="${log.path}/similar.log" filePattern="${log.path}/similar.%i.log">
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}][%-5level][%F:%L] - %m%n" />
-            <SizeBasedTriggeringPolicy size="64MB" />
-            <DefaultRolloverStrategy max="20"/>
-        </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="info">
@@ -36,18 +29,6 @@
             <appender-ref ref="RollingFile" />
             <appender-ref ref="errorLog" />
         </Root>
-        <logger name="similarLogger" additivity="false" level="WARN">
-            <appender-ref ref="similarLog" />
-        </logger>
-        <logger name="springfox.documentation.spring.web.readers.operation" level="warn"/>
-        <logger name="org.docx4j" level="error"/>
-        <logger name="org.apache.kafka.common.config.AbstractConfig"  level="error"/>
-        <logger name="org.apache.kafka.common.utils.AppInfoParser"  level="warn"/>
-        <logger name="org.apache.kafka.clients.consumer.ConsumerConfig"  level="warn"/>
-        <logger name="org.apache.kafka.clients.admin.AdminClientConfig"  level="warn"/>
-        <logger name="org.apache.zookeeper.ClientCnxn" level="warn"/>
-        <logger name="com.dbapp.mirror.service.WebFilterSecurityInterceptor" level="warn"/>
-        <logger name="org.apache.kafka.clients.NetworkClient" level="error"/>
         <!--<logger name="BigdataApi" level="debug"/>-->
     </Loggers>
 </configuration>
