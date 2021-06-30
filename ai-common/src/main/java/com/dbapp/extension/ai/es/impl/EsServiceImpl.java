@@ -2,6 +2,7 @@ package com.dbapp.extension.ai.es.impl;
 
 import com.dbapp.extension.ai.es.IEsService;
 import com.dbapp.extension.ai.utils.GlobalAttribute;
+import com.dbapp.nacos.config.GlobalConfig;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -9,6 +10,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,13 +18,16 @@ import java.io.IOException;
 @Service
 public final class EsServiceImpl implements IEsService {
 
+    @Autowired
+    private GlobalConfig globalConfig;
+
     private RestHighLevelClient highLevelClient;
     private int socketTimeOut;
 
     private EsServiceImpl() {
         socketTimeOut = GlobalAttribute.getPropertyInteger("es.socketTimeOut", 180);
-        String[] ips = GlobalAttribute.getPropertyString("es.server.ip", "192.168.31.39").split(",");
-        String[] portArr = GlobalAttribute.getPropertyString("es.server.restPort", "19201").split(",");
+        String[] ips = globalConfig.getString("es_server_ip", "1.es1,1.es2").split(",");
+        String[] portArr = globalConfig.getString("es_server_rest_port", "9200").split(",");
         HttpHost[] hosts = new HttpHost[ips.length];
         for (int i = 0; i < ips.length; i++) {
             if (i < portArr.length) {
