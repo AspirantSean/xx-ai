@@ -13,6 +13,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 @Service
@@ -24,7 +25,8 @@ public final class EsServiceImpl implements IEsService {
     private RestHighLevelClient highLevelClient;
     private int socketTimeOut;
 
-    private EsServiceImpl() {
+    @PostConstruct
+    private void init() {
         socketTimeOut = GlobalAttribute.getPropertyInteger("es.socketTimeOut", 180);
         String[] ips = globalConfig.getString("es_server_ip", "1.es1,1.es2").split(",");
         String[] portArr = globalConfig.getString("es_server_rest_port", "9200").split(",");
