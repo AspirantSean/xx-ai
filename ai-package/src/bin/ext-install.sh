@@ -96,7 +96,8 @@ if [[ $action == "update" ]]; then
             #删除配置
             if [[ $operation_type == "delete" ]]; then
                 log "移除配置项：$properties_key"
-                sed -i s#^$properties_key.*                continue
+                sed -i s#^$properties_key.*
+                continue
             fi
 
             #配置内容拼装
