@@ -1,5 +1,6 @@
 #!/bin/bash
 install_log_file=/data/var/log/install-ext.log
+mkdir -p /data/var/log
 log() {
     echo "[`date +%Y-%m-%d' '%H:%M:%S`] $1" >> $install_log_file
 }
