@@ -1,7 +1,7 @@
 #!/bin/bash
-
+install_log_file=/data/var/log/install-ext.log
 log() {
-    echo "[`date +%Y-%m-%d' '%H:%M:%S`] $1" >> $ext_home/install.log
+    echo "[`date +%Y-%m-%d' '%H:%M:%S`] $1" >> $install_log_file
 }
 
 log_command_result() {
@@ -10,7 +10,7 @@ log_command_result() {
 
     for line in `eval $1`
     do
-        echo "[`date +%Y-%m-%d' '%H:%M:%S`] $line" >> $ext_home/install.log
+        echo "[`date +%Y-%m-%d' '%H:%M:%S`] $line" >> $install_log_file
     done
 
     IFS=$OLD_IFS
@@ -25,7 +25,7 @@ ext_home=`cat $current_path/conf/meta_info.data |jq -r '.deployPath'`
 #---------------------------------------------安装、升级判断----------------------------------------------
 action=install
 if [ -d $ext_home ]; then
-    echo "开始升级程序，详情查看：$ext_home/install.log"
+    echo "开始升级程序，详情查看：$install_log_file"
     log "检测当前程序状态："
     log_command_result "$ext_home/bin/ext-cli.sh status"
 
@@ -36,7 +36,7 @@ if [ -d $ext_home ]; then
     log "开始升级程序"
     action=update
 else
-    echo "开始安装程序，详情查看：$ext_home/install.log"
+    echo "开始安装程序，详情查看：$install_log_file"
     mkdir -p $ext_home
     log "开始安装程序"
 fi
@@ -78,7 +78,7 @@ if [[ $action == "update" ]]; then
                 continue
             fi
             #解析每行操作
-            content=(${line//-----/})
+            content=(${line//-----/ })
             properties_file=$ext_home/conf/${content[0]}
             operation_type=${content[1]}
             properties_key=${content[2]}
@@ -96,7 +96,7 @@ if [[ $action == "update" ]]; then
             #删除配置
             if [[ $operation_type == "delete" ]]; then
                 log "移除配置项：$properties_key"
-                sed -i s#^$properties_key.*
+                sed -i s#^$properties_key.*##g $properties_file
                 continue
             fi
 
@@ -147,7 +147,7 @@ if [[ $action == "install" ]]; then
 else
     log "升级程序需排除一下文件："
     log_command_result "cat $current_path/bin/exclude_conf.list"
-    rsync -avP --exclude-from=$current_path/bin/exclude_conf.list $current_path/conf/ $ext_home/conf >> $ext_home/install.log
+    rsync -avP --exclude-from=$current_path/bin/exclude_conf.list $current_path/conf/ $ext_home/conf >> $install_log_file
 fi
 log "复制/conf目录完成"
 
@@ -170,4 +170,4 @@ if [[ $action == "install" ]]; then
 elif [[ $action == "update" ]]; then
     log "升级完成，开始启动程序"
 fi
-$ext_home/bin/ext-cli.sh start
+$ext_home/bin/ext-cli.sh restart
