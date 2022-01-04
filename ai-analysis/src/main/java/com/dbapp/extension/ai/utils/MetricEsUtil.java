@@ -19,6 +19,7 @@ import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInter
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -69,7 +70,7 @@ public final class MetricEsUtil {
                             .aggregation(AggregationBuilders.dateHistogram("dateHistogram")
                                     .field("@timestamp")
                                     .dateHistogramInterval(DateHistogramInterval.minutes(10))// 暂时默认写死为10min聚合一次，以后改为metricInfo.getMetric().getWindow()动态调整
-                                    .timeZone(ZoneId.of("Asia/Shanghai"))
+                                    .timeZone(DateTimeZone.getDefault())
                                     .minDocCount(0)
                                     .subAggregation(aggregationBuilder)));
             LOG.info("Metric histogram search request: {}", searchRequest);
