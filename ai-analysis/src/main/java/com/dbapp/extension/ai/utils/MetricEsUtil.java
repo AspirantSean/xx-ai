@@ -68,7 +68,7 @@ public final class MetricEsUtil {
                             .query(transfer(metricInfo.getQuery()))
                             .aggregation(AggregationBuilders.dateHistogram("dateHistogram")
                                     .field("@timestamp")
-                                    .calendarInterval(DateHistogramInterval.minutes(10))// 暂时默认写死为10min聚合一次，以后改为metricInfo.getMetric().getWindow()动态调整
+                                    .dateHistogramInterval(DateHistogramInterval.minutes(10))// 暂时默认写死为10min聚合一次，以后改为metricInfo.getMetric().getWindow()动态调整
                                     .timeZone(ZoneId.of("Asia/Shanghai"))
                                     .minDocCount(0)
                                     .subAggregation(aggregationBuilder)));
