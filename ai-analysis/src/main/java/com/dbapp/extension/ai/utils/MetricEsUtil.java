@@ -70,7 +70,7 @@ public final class MetricEsUtil {
                             .aggregation(AggregationBuilders.dateHistogram("dateHistogram")
                                     .field("@timestamp")
                                     .dateHistogramInterval(DateHistogramInterval.minutes(10))// 暂时默认写死为10min聚合一次，以后改为metricInfo.getMetric().getWindow()动态调整
-                                    .timeZone(DateTimeZone.getDefault())
+                                    .timeZone(ZoneId.systemDefault())
                                     .minDocCount(0)
                                     .subAggregation(aggregationBuilder)));
             LOG.info("Metric histogram search request: {}", searchRequest);
