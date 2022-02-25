@@ -9,7 +9,7 @@ import com.dbapp.extension.ai.utils.GlobalAttribute;
 import com.dbapp.extension.mirror.dto.AIModel;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DateBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;

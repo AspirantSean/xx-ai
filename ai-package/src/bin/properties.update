@@ -1,2 +1,3 @@
-file-----type-----key-----value-----description
+# 属性更新文件 start
+application.properties-----insert-----server.ssl.key-store-password-----tomcat-----
 #end

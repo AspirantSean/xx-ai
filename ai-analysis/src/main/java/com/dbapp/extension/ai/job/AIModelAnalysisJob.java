@@ -11,7 +11,7 @@ import com.dbapp.extension.ai.utils.GlobalAttribute;
 import com.dbapp.extension.ai.utils.SystemProperUtil;
 import com.dbapp.extension.mirror.dto.MetricInfo;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;

@@ -2,7 +2,7 @@ package com.dbapp.extension.ai.quartz.listener;
 
 import com.dbapp.extension.ai.management.runtime.process.AIModelProcess;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 
 import java.text.SimpleDateFormat;

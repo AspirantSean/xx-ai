@@ -2,21 +2,17 @@ package com.dbapp.extension.ai.config;
 
 import feign.Client;
 import feign.Logger;
-import feign.RequestInterceptor;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
-import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
-import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.servlet.http.HttpServletRequest;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -37,9 +33,8 @@ public class FeignConfig {
     }
 
     @Bean
-    public Client feignClient(CachingSpringLoadBalancerFactory cachingFactory, SpringClientFactory clientFactory) {
-        Client client = new Client.Default(createSSLSocketFactory(), (s, session) -> true);
-        return new LoadBalancerFeignClient(client, cachingFactory, clientFactory);
+    public Client feignClient(LoadBalancerClient loadBalancerClient, LoadBalancerClientFactory loadBalancerClientFactory) {
+        return new FeignBlockingLoadBalancerClient(new Client.Default(createSSLSocketFactory(), (s, session) -> true), loadBalancerClient, loadBalancerClientFactory);
     }
 
     /**
