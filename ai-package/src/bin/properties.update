@@ -1,3 +1,5 @@
-# 属性更新文件 start
+file-----type-----key-----value-----description
 application.properties-----insert-----server.ssl.key-store-password-----tomcat-----
+application.properties-----delete-----spring.datasource.url----- -----
+application.properties-----insert-----spring.datasource.url-----jdbc:mysql://basic:3306/bigdata-web?autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&allowMultiQueries=true-----
 #end
