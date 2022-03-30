@@ -208,7 +208,7 @@ help() {
 #获取进程号
 get_pid() {
     #进程ID
-    pid=`ps -ef | grep $main_class | grep -v grep | awk 'NR==1{print $2}'`
+    pid=`ps -ef | grep $main_class | grep -v grep | awk '{print $2}'`
     echo $pid
 }
 
