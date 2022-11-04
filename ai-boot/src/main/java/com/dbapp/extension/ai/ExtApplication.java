@@ -4,6 +4,7 @@ import com.dbapp.extension.ai.ha.ZookeeperProps;
 import com.dbapp.extension.ai.ha.ZookeeperPropsWithLinux;
 import com.dbapp.extension.ai.util.ZkCuratorUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -47,7 +48,7 @@ public class ExtApplication {
             zkCuratorUtil.start();
             Stat stat = zkCuratorUtil.checkExists(lock_node);
             if (stat == null) {
-                zkCuratorUtil.create(lock_node);
+                zkCuratorUtil.create(lock_node, CreateMode.EPHEMERAL);
             }
             long start = System.currentTimeMillis();
             log.info("Try to obtain the app lock...");
