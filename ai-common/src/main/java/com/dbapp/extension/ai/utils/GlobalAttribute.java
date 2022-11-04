@@ -2,9 +2,11 @@ package com.dbapp.extension.ai.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -31,7 +33,8 @@ public final class GlobalAttribute {
      */
     public static void init() {
         globalProperties = new Properties();
-        try (InputStreamReader in = new InputStreamReader(new FileInputStream(com.dbapp.extension.ai.utils.SystemProperUtil.getResourcesPath() + SystemProperUtil.getFileSeparator() + "global.properties"), StandardCharsets.UTF_8)) {
+        Path propertiesPath = Paths.get(SystemProperUtil.getResourcesPath() + SystemProperUtil.getFileSeparator() + "global.properties");
+        try (InputStreamReader in = new InputStreamReader(Files.newInputStream(propertiesPath), StandardCharsets.UTF_8)) {
             //设置编码格式解决乱码
             globalProperties.load(in);
         } catch (Exception e) {
