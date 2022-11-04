@@ -27,7 +27,7 @@ public class ExtApplication {
     public static void main(String[] args) {
         try {
             //增加 zk 分布式锁
-            zkLock("/lock_ha/lock_patrol");
+            zkLock("/lock_ha/lock_ai");
             SpringApplication application = new SpringApplication(ExtApplication.class);
             application.run(args);
         } catch (ApplicationContextException e) {
