@@ -71,8 +71,11 @@ start() {
     fi
 
     #日志目录
-    if [ ! -d $EXT_HOME/logs ]; then
-         mkdir $EXT_HOME/logs
+    if [ ! -d /data/var/log/ai ]; then
+        mkdir -p /data/var/log/ai
+    fi
+    if [ ! -L $EXT_HOME/logs ]; then
+         ln -s /data/var/log/ai $EXT_HOME/logs
     fi
 
     #启动前处理
