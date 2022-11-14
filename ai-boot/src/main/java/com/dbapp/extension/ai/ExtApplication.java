@@ -4,8 +4,7 @@ import com.dbapp.extension.ai.ha.ZookeeperProps;
 import com.dbapp.extension.ai.ha.ZookeeperPropsWithLinux;
 import com.dbapp.extension.ai.util.ZkCuratorUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -46,13 +45,10 @@ public class ExtApplication {
         try {
             ZkCuratorUtil zkCuratorUtil = new ZkCuratorUtil(getZookeeperUrl(), "");
             zkCuratorUtil.start();
-            Stat stat = zkCuratorUtil.checkExists(lock_node);
-            if (stat == null) {
-                zkCuratorUtil.create(lock_node, CreateMode.EPHEMERAL);
-            }
             long start = System.currentTimeMillis();
             log.info("Try to obtain the app lock...");
-            zkCuratorUtil.getLock(lock_node).acquire();
+            InterProcessMutex lock = zkCuratorUtil.getLock(lock_node);
+            lock.acquire();
             log.info("Obtaining the app lock successfully，it takes：" + (System.currentTimeMillis() - start) / 1000 + "s");
         } catch (Exception e) {
             e.printStackTrace();
