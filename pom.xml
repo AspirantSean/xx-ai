@@ -9,6 +9,10 @@
         <version>3.6.2-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <elasticsearch.version>7.16.3</elasticsearch.version>
+    </properties>
+
     <groupId>com.dbapp.extension.ai</groupId>
     <artifactId>ext-ai</artifactId>
     <packaging>pom</packaging>
