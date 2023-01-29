@@ -33,6 +33,8 @@ setting_java_env() {
     #set jvm setting: print gc
     JAVA_OPTS="$JAVA_OPTS -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps "
 
+    JAVA_OPTS="$JAVA_OPTS -Dfastjson.parser.safeMode=true"
+
     JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir=/var/tmp"
 
     # TODO make sure java version is 1.6 or above
