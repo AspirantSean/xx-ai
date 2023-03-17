@@ -13,9 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.quartz.DateBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public final class AIModelManager {
+public final class AIModelManager implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final String POLLING_JOB_NAME = "polling.job.name";
     private static final String POLLING_JOB_GROUP_NAME = "polling.job.group.name";
@@ -36,11 +37,15 @@ public final class AIModelManager {
     @Resource
     private AIAnomalyAnalysisMapper aiAnomalyAnalysisMapper;
 
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+        initializeTask();
+    }
+
     /**
      * 初始化任务
      * 定时调整轮询AI模型的时间间隔
      */
-    @PostConstruct
     private void initializeTask() {
         new Timer().schedule(new TimerTask() {
             private final Map<String, Object> cache = new ConcurrentHashMap<>();
