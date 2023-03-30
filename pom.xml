@@ -25,6 +25,12 @@
         <dependency>
             <groupId>com.dbapp.boot</groupId>
             <artifactId>ailpha-spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
