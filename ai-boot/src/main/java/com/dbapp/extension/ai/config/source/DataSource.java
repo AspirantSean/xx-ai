@@ -34,7 +34,7 @@ public class DataSource {
     /**
      * 数据库连接
      */
-    @Value("${spring.datasource.jdbc-url}")
+    @Value("${spring.datasource.url}")
     private String url;
     @Value("${spring.datasource.username}")
     private String userName;
