@@ -28,13 +28,13 @@ import java.util.TimeZone;
 
 @Configuration
 @Slf4j
-@MapperScan(basePackages = {"com.dbapp.*.mapper"}, sqlSessionFactoryRef = "sqlSessionFactory")
+@MapperScan(basePackages = {"com.dbapp.**.mapper"}, sqlSessionFactoryRef = "sqlSessionFactory")
 public class DataSource {
 
     /**
      * 数据库连接
      */
-    @Value("${spring.datasource.url}")
+    @Value("${spring.datasource.jdbc-url}")
     private String url;
     @Value("${spring.datasource.username}")
     private String userName;
