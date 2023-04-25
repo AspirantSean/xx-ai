@@ -1,6 +1,6 @@
 file-----type-----key-----value-----description
 application.properties-----insert-----server.tomcat.uri-encoding-----utf-8-----
-application.properties-----update-----spring.datasource.jdbc-url-----jdbc:postgresql://basic:5432/ailpha?currentSchema=ai&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true-----
+application.properties-----insert-----spring.datasource.jdbc-url-----jdbc:postgresql://basic:5432/ailpha?currentSchema=ai&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true-----
 application.properties-----update-----spring.datasource.username-----dbapp-----
 application.properties-----insert-----datasource.type-----pg-----
 application.properties-----update-----spring.datasource.driver-class-name-----org.postgresql.Driver-----
