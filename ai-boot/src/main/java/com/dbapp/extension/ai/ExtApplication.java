@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @Description 启动类
  * @Version 1.0-SNAPSHOT
  **/
-@EnableFeignClients(basePackages = {"com.dbapp.extension.*.rpc"})
+@EnableFeignClients(basePackages = {"com.dbapp.**.rpc"})
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
