@@ -40,7 +40,7 @@ public class DBConfig {
 
     public synchronized static AssetInformationMapper getAssetInformationMapper() {
         if (assetInformationMapper == null) {
-            assetInformationMapper = sqlSessionFactory.openSession().getMapper(AssetInformationMapper.class);
+            assetInformationMapper = sqlSessionFactory.openSession(true).getMapper(AssetInformationMapper.class);
         }
         return assetInformationMapper;
     }

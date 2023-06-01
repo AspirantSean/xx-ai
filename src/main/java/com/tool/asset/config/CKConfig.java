@@ -46,7 +46,7 @@ public class CKConfig {
 
     public synchronized static AssetStatisticsTaskMapper getAssetStatisticsTaskMapper() {
         if (assetStatisticsTaskMapper == null) {
-            assetStatisticsTaskMapper = sqlSessionFactory.openSession().getMapper(AssetStatisticsTaskMapper.class);
+            assetStatisticsTaskMapper = sqlSessionFactory.openSession(true).getMapper(AssetStatisticsTaskMapper.class);
         }
         return assetStatisticsTaskMapper;
     }
