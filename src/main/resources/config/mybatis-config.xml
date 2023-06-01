@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <settings>
+        <setting name="callSettersOnNulls" value="true"/>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+    <environments default="mysql">
+        <environment id="mysql">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://basic:3306/bigdata-web?autoReconnect=true&amp;autoReconnectForPools=true&amp;useUnicode=true&amp;characterEncoding=utf8&amp;createDatabaseIfNotExist=true&amp;allowMultiQueries=true&amp;zeroDateTimeBehavior=convertToNull"/>
+<!--                <property name="url" value="jdbc:mysql://192.168.30.195:13306/bigdata-web?autoReconnect=true&amp;autoReconnectForPools=true&amp;useUnicode=true&amp;characterEncoding=utf8&amp;createDatabaseIfNotExist=true&amp;allowMultiQueries=true&amp;zeroDateTimeBehavior=convertToNull"/>-->
+                <property name="username" value="dbapp"/>
+                <property name="password" value="jY%kng8cc&amp;"/>
+            </dataSource>
+        </environment>
+        <environment id="postgresql">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.postgresql.Driver"/>
+                <property name="url" value="jdbc:postgresql://postgres:5432/ailpha?currentSchema=bigdata_web&amp;AutoReconnect=true&amp;TimeZone=UTC&amp;tcpKeepAlive=true&amp;charSet=UTF8"/>
+<!--                <property name="url" value="jdbc:postgresql://192.168.30.195:5432/ailpha?currentSchema=bigdata_web&amp;AutoReconnect=true&amp;TimeZone=UTC&amp;tcpKeepAlive=true&amp;charSet=UTF8"/>-->
+                <property name="username" value="dbapp"/>
+                <property name="password" value="jY%kng8cc&amp;"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="MySQL" value="mysql"/>
+        <property name="PostgreSQL" value="pg"/>
+    </databaseIdProvider>
+    <mappers>
+        <mapper resource="mapper/AssetInformationMapper.xml"/>
+    </mappers>
+</configuration>

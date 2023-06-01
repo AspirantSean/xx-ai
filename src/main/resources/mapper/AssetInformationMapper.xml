@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tool.asset.mapper.AssetInformationMapper">
+
+    <select id="getAssetRatingRules" resultType="com.tool.asset.entities.AssetRatingRule" databaseId="pg">
+        SELECT id,
+               group_name,
+               rank,
+               field_name,
+               grading_label,
+               other_tag,
+               score,
+               condition,
+               datasource,
+               note
+        FROM t_asset_rating_rule
+    </select>
+
+    <select id="getAssetRatingRules" resultType="com.tool.asset.entities.AssetRatingRule" databaseId="mysql">
+        SELECT id,
+               groupName,
+               `rank`,
+               fieldName,
+               gradingLabel,
+               otherTag,
+               score,
+               `condition`,
+               datasource,
+               note
+        FROM t_asset_rating_rule
+    </select>
+
+    <insert id="insertAssetRating" parameterType="com.tool.asset.entities.AssetRating" databaseId="pg">
+        INSERT INTO t_asset_rating (id,
+                                     asset_id,
+                                     asset_health_state,
+                                     asset_score,
+                                     rating_time,
+                                     tags,
+                                     rate_group,
+                                     from_subordinate_platform,
+                                     create_time)
+        VALUES
+            <foreach collection="assetRatings" item="assetRating" separator=",">
+                (#{assetRating.id},
+                 #{assetRating.assetId},
+                 #{assetRating.assetHealthState,jdbcType=OTHER},
+                 #{assetRating.assetScore},
+                 #{assetRating.ratingTime},
+                 #{assetRating.tags},
+                 #{assetRating.rateGroup},
+                 #{assetRating.fromSubordinatePlatform},
+                 #{assetRating.createTime})
+            </foreach>
+        ON CONFLICT (create_time, asset_id) DO UPDATE SET
+        asset_health_state = EXCLUDED.asset_health_state,
+        asset_score = EXCLUDED.asset_score,
+        rating_time = EXCLUDED.rating_time,
+        tags = EXCLUDED.tags,
+        rate_group = EXCLUDED.rate_group,
+        from_subordinate_platform = EXCLUDED.from_subordinate_platform,
+        id = EXCLUDED.id
+    </insert>
+
+    <insert id="insertAssetRating" parameterType="com.tool.asset.entities.AssetRating" databaseId="mysql">
+        REPLACE INTO t_asset_rating (id,
+        asset_id,
+        asset_health_state,
+        asset_score,
+        rating_time,
+        tags,
+        rate_group,
+        from_subordinate_platform,
+        create_time)
+        VALUES
+        <foreach collection="assetRatings" item="assetRating" separator=",">
+            (#{assetRating.id},
+            #{assetRating.assetId},
+            #{assetRating.assetHealthState},
+            #{assetRating.assetScore},
+            #{assetRating.ratingTime},
+            #{assetRating.tags},
+            #{assetRating.rateGroup},
+            #{assetRating.fromSubordinatePlatform},
+            #{assetRating.createTime})
+        </foreach>
+    </insert>
+
+    <delete id="changeAssetToHealth" databaseId="pg">
+        DELETE
+        FROM t_asset_rating
+        WHERE create_time <![CDATA[>=]]> #{createTime} AND rating_time <![CDATA[<]]> #{startTime}
+    </delete>
+
+    <delete id="changeAssetToHealth" databaseId="mysql">
+        DELETE
+        FROM t_asset_rating
+        WHERE create_time <![CDATA[>=]]> #{createTime} AND rating_time <![CDATA[<]]> #{startTime}
+    </delete>
+
+    <delete id="deleteHealthAssets" databaseId="pg">
+        DELETE
+        FROM t_asset_rating
+        WHERE asset_health_state = 'healthy'
+          AND asset_score = 100
+    </delete>
+
+    <delete id="deleteHealthAssets" databaseId="mysql">
+        DELETE
+        FROM t_asset_rating
+        WHERE asset_health_state = 'healthy'
+          AND asset_score = 100
+    </delete>
+
+    <delete id="deleteHealthAssetsById" databaseId="pg">
+        DELETE
+        FROM t_asset_rating
+        WHERE create_time <![CDATA[>=]]> #{createTime}
+            AND rating_time <![CDATA[<]]> #{finishTime}
+            AND asset_id IN
+            <foreach collection="assetIds" item="assetId" open="(" separator="," close=")" nullable="true">
+                #{assetId}
+            </foreach>
+    </delete>
+
+    <delete id="deleteHealthAssetsById" databaseId="mysql">
+        DELETE
+        FROM t_asset_rating
+        WHERE create_time <![CDATA[>=]]> #{createTime}
+        AND rating_time <![CDATA[<]]> #{finishTime}
+        AND asset_id IN
+        <foreach collection="assetIds" item="assetId" open="(" separator="," close=")" nullable="true">
+            #{assetId}
+        </foreach>
+    </delete>
+
+    <select id="rateAssetByVulnerability" resultType="com.tool.asset.entities.AssetRatingHit" databaseId="pg">
+        <choose>
+            <when test="ratingSql != null">
+                ${ratingSql}
+            </when>
+            <otherwise>
+                SELECT asset_id FROM t_asset_rating WHERE 1 != 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="rateAssetByVulnerability" resultType="com.tool.asset.entities.AssetRatingHit" databaseId="mysql">
+        <choose>
+            <when test="ratingSql != null">
+                ${ratingSql}
+            </when>
+            <otherwise>
+                SELECT asset_id FROM t_asset_rating WHERE 1 != 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectAssetIdsWhichHasVulnerability" resultType="com.tool.asset.entities.WaitForRatingAsset" databaseId="pg">
+        SELECT DISTINCT tai.asset_id   AS "assetId",
+                        tai.asset_type AS "assetType",
+                        2              AS "rateType"
+        FROM t_asset_information tai
+                     LEFT JOIN t_asset_vulnerability_information tavi ON tai.asset_id = tavi.asset_id
+        WHERE tai.asset_id = tavi.asset_id
+    </select>
+
+    <select id="selectAssetIdsWhichHasVulnerability" resultType="com.tool.asset.entities.WaitForRatingAsset" databaseId="mysql">
+        SELECT DISTINCT tai.asset_id   AS assetId,
+                        tai.asset_type AS assetType,
+                        2              AS rateType
+        FROM t_asset_information tai
+                     LEFT JOIN t_asset_vulnerability_information tavi ON tai.asset_id = tavi.asset_id
+        WHERE tai.asset_id = tavi.asset_id
+    </select>
+
+    <select id="getRatingAssetByIds" resultType="com.tool.asset.entities.WaitForRatingAsset" databaseId="pg">
+        SELECT asset_id   AS "assetId",
+               asset_type AS "assetType",
+               3          AS "rateType"
+        FROM t_asset_information
+        WHERE asset_id IN
+            <foreach collection="assetIds" item="assetId" open="(" separator="," close=")" nullable="true">
+                #{assetId}
+            </foreach>
+    </select>
+
+    <select id="getRatingAssetByIds" resultType="com.tool.asset.entities.WaitForRatingAsset" databaseId="mysql">
+        SELECT asset_id   AS assetId,
+        asset_type AS assetType,
+        3          AS rateType
+        FROM t_asset_information
+        WHERE asset_id IN
+        <foreach collection="assetIds" item="assetId" open="(" separator="," close=")" nullable="true">
+            #{assetId}
+        </foreach>
+    </select>
+
+
+</mapper>

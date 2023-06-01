@@ -1,0 +1,5 @@
+### project classes ###
+target/
+logs/
+### IntelliJ IDEA ###
+.idea

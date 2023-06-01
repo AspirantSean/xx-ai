@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tool.asset.ckmapper.AssetStatisticsTaskMapper">
+    <select id="ratingHits" resultType="com.tool.asset.entities.AssetRatingHit">
+        <choose>
+            <when test="ratingSql != null">
+                ${ratingSql}
+            </when>
+            <otherwise>
+                SELECT asset_id FROM t_asset_information WHERE 1 != 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectAssetIdsWhichHasAlarms" resultType="com.tool.asset.entities.WaitForRatingAsset">
+        SELECT asset_id   AS assetId,
+               asset_type AS assetType,
+               1          AS rateType
+        FROM t_asset_information
+        WHERE asset_id IN (SELECT DISTINCT destHostAssetId
+                           FROM ailpha_security_alarm
+                           WHERE endTime <![CDATA[>=]]> today()
+                           UNION ALL
+                           SELECT DISTINCT srcHostAssetId
+                           FROM ailpha_security_alarm
+                           WHERE endTime <![CDATA[>=]]> today())
+    </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

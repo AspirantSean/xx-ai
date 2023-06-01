@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <settings>
+        <setting name="callSettersOnNulls" value="true"/>
+        <setting name="autoMappingBehavior" value="FULL"/>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+    <environments default="clickhouse">
+        <environment id="clickhouse">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="ru.yandex.clickhouse.ClickHouseDriver"/>
+<!--                <property name="url" value="jdbc:clickhouse://192.168.30.195:18123/securityAlarm?socket_timeout=300000&amp;characterEncoding=UTF-8&amp;keepAliveTimeout=300000"/>-->
+                <property name="url" value="jdbc:clickhouse://1.clickhouse1:8123/securityAlarm?socket_timeout=300000&amp;characterEncoding=UTF-8&amp;keepAliveTimeout=300000"/>
+                <property name="username" value="default"/>
+                <property name="password" value=""/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="ckmappers/AssetStatisticsTaskMapper.xml"/>
+    </mappers>
+</configuration>
