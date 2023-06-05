@@ -6,7 +6,7 @@
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="{%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1.} [line-%line] - %msg%n}{STYLE=Logback}" disableAnsi="false" noConsoleNoAnsi="false"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1.} [line-%line] - %msg%n" disableAnsi="false" noConsoleNoAnsi="false"/>
         </Console>
 
         <RollingFile name="RollingFile" fileName="${log.path}/main.log" filePattern="${log.path}/main.%i.log">
@@ -16,11 +16,9 @@
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
 
-        <RollingFile name="ratingAssetLog" fileName="${log.path}/ratingAssetLog.log" filePattern="${log.path}/ratingAssetLog.%i.log">
+        <RollingFile name="ratingAssetLog" fileName="${log.path}/ratingAssetLog.${application.start.time}.log">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}][%-5level][%F:%L] - %m%n"/>
-            <SizeBasedTriggeringPolicy size="64MB"/>
-            <DefaultRolloverStrategy max="10"/>
+            <PatternLayout pattern="%m%n"/>
         </RollingFile>
     </Appenders>
     <Loggers>

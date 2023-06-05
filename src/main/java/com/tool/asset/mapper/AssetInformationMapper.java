@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ytm
@@ -76,4 +77,7 @@ public interface AssetInformationMapper {
      */
     List<WaitForRatingAsset> getRatingAssetByIds(@Param("assetIds") Collection<String> assetIds);
 
+    String getRatingTaskExecTime();
+
+    List<Map<String, String>> getAssetIdentificationByAssetId(@Param("assetId") String assetId);
 }

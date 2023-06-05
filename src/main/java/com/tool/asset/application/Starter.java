@@ -2,9 +2,9 @@ package com.tool.asset.application;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSON;
+import com.tool.asset.dao.AssetInformationDao;
 import com.tool.asset.entities.AssetRatingRule;
 import com.tool.asset.handler.AssetRatingHandler;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -12,8 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -21,19 +20,22 @@ import java.util.stream.Collectors;
  * @version 2.0
  * @since 2023/5/30 16:32
  */
-@Slf4j
 public class Starter {
+
+    static {
+        System.setProperty("application.start.time", System.currentTimeMillis() + "");
+    }
 
     public static Logger logger = LoggerFactory.getLogger("ratingAssetLog");
 
     public static boolean saveResult = false;
 
     public static void main(String[] args) {
-        String ratingTime;
+        List<String> ratingTimes = new ArrayList<>();
         String assetIds;
         String baasUrl;
         if (ArrayUtil.isEmpty(args)) {
-            ratingTime = LocalDateTime.now().format(AssetRatingRule.dateTimeFormatter);
+            ratingTimes.add(LocalDateTime.now().format(AssetRatingRule.dateTimeFormatter));
             assetIds = null;
             baasUrl = "http://1.flink1:8999";
         } else {
@@ -48,34 +50,50 @@ public class Starter {
                     })
                     .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
             if (map.containsKey("-help")) {
-                String tip = "\n执行命令：java -jar (tool path) [-ratingTime=yyyy-MM-dd_HH:mm:ss[ -assetIds={id1}[,{id2}[,{id3}...]][ -baasUrl=http://1.flink1:8999]]]\n"
-                        + "    示    例：java -jar tool.jar -ratingTime=2023-04-01_23:59:59 -assetIds=asset_1,asset_2,asset_3 -baasUrl=http://1.flink1:8999\n"
+                String tip = "\n执行命令：java -jar (tool path) [-ratingTimes=yyyy-MM-dd[ -assetIds={id1}[,{id2}[,{id3}...]][ -baasUrl=http://1.flink1:8999[ -save=true]]]]\n"
+                        + "    示    例：java -jar tool.jar -ratingTimes=2023-04-01,2023-04-02 -assetIds=asset_1,asset_2,asset_3 -baasUrl=http://1.flink1:8999 -save=true\n"
                         + "    参数解释：\n"
-                        + "         -ratingTime     评级时间，需评级当天任意时间，会自动将评级起止时间定位到ratingTime的当天0时0分0秒-23时59分59秒\n"
+                        + "         -ratingTimes    评级时间，需评级当天日期，可逗号分隔输入多天，会自动将评级起止时间定位到ratingTime的当天0时0分0秒-23时59分59秒\n"
                         + "         -assetIds       待评级资产id，英文逗号分隔，不可有空格\n"
                         + "         -baasUrl        baas服务地址\n"
                         + "         -save           评级结果是否存入数据库";
                 System.out.println(tip);
-                log.warn(tip);
                 return;
             }
-            log.info("参数：" + JSON.toJSONString(map));
-            String _ratingTime = map.get("-ratingTime");
+            System.out.println("参数：" + JSON.toJSONString(map));
+            String _ratingTimes = map.get("-ratingTimes");
             assetIds = map.get("-assetIds");
             baasUrl = map.get("-baasUrl");
             saveResult = "true".equals(map.get("-save"));
-            if (StringUtils.isNotBlank(_ratingTime)) {
-                LocalDateTime date = LocalDateTime.parse(_ratingTime, DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss"));
-                ratingTime = LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 23, 59, 59).format(AssetRatingRule.dateTimeFormatter);// 设为当天最后的时间点
+            if (StringUtils.isNotBlank(_ratingTimes)) {
+                for (String _ratingTime : _ratingTimes.split(",")) {
+                    LocalDateTime date = LocalDateTime.parse(_ratingTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    ratingTimes.add(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 23, 59, 59).format(AssetRatingRule.dateTimeFormatter));// 设为当天最后的时间点
+                }
             } else {
-                ratingTime = LocalDateTime.now().format(AssetRatingRule.dateTimeFormatter);
+                ratingTimes.add(LocalDateTime.now().format(AssetRatingRule.dateTimeFormatter));
             }
         }
         AssetRatingHandler assetRatingHandler = AssetRatingHandler.getInstance(baasUrl);
         if (StringUtils.isBlank(assetIds)) {
-            assetRatingHandler.calculate(ratingTime);
-        } else {
-            assetRatingHandler.pushRatingAsset(ratingTime, assetIds.split(","));
+            String ratingTaskExecTime = AssetInformationDao.getInstance().getRatingTaskExecTime();
+            if (StringUtils.isNotBlank(ratingTaskExecTime) && Long.parseLong(ratingTaskExecTime) > 10 * 60 * 1000) {
+                System.out.println("全量资产上次评级时间：" + ratingTaskExecTime + "ms，是否继续评级？");
+                System.out.println("    请输入\"是\"继续执行，\"否\"停止执行");
+                try (Scanner scanner = new Scanner(System.in)) {
+                    String input = scanner.nextLine();
+                    if ("否".equals(input)) {
+                        return;
+                    }
+                }
+            }
+        }
+        for (String ratingTime : ratingTimes) {
+            if (StringUtils.isBlank(assetIds)) {
+                assetRatingHandler.calculate(ratingTime);
+            } else {
+                assetRatingHandler.pushRatingAsset(ratingTime, assetIds.split(","));
+            }
         }
     }
 }

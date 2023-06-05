@@ -196,5 +196,21 @@
         </foreach>
     </select>
 
+    <select id="getAssetIdentificationByAssetId" resultType="java.util.Map" databaseId="pg">
+        SELECT identification_type AS type, identification FROM t_asset_identification WHERE asset_id = #{assetId}
+    </select>
+
+    <select id="getAssetIdentificationByAssetId" resultType="java.util.Map" databaseId="mysql">
+        SELECT identification_type AS type, identification FROM t_asset_identification WHERE asset_id = #{assetId}
+    </select>
+
+
+    <select id="getRatingTaskExecTime" resultType="java.lang.String" databaseId="pg">
+        SELECT execution_time FROM t_quartz_job where bean_name = 'com.dbapp.asset.task.AssetRatingTask'
+    </select>
+
+    <select id="getRatingTaskExecTime" resultType="java.lang.String" databaseId="mysql">
+        SELECT execution_time FROM t_quartz_job where bean_name = 'com.dbapp.asset.task.AssetRatingTask'
+    </select>
 
 </mapper>

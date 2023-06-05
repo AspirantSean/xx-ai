@@ -7,11 +7,12 @@ import com.tool.asset.entities.AssetRatingHit;
 import com.tool.asset.entities.AssetRatingRule;
 import com.tool.asset.entities.WaitForRatingAsset;
 import com.tool.asset.mapper.AssetInformationMapper;
-import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 1、资产主表修改加锁；<br/>2、用于代码层面优化SQL
@@ -20,7 +21,6 @@ import java.util.List;
  * @version 2.0
  * @since 2021/11/8 15:04
  */
-@Slf4j
 public class AssetInformationDao {
 
     private final AssetInformationMapper assetInformationMapper;
@@ -81,5 +81,17 @@ public class AssetInformationDao {
 
     public List<WaitForRatingAsset> getRatingAssetByIds(Collection<String> assetIds) {
         return assetInformationMapper.getRatingAssetByIds(assetIds);
+    }
+
+    public String getRatingTaskExecTime() {
+        return assetInformationMapper.getRatingTaskExecTime();
+    }
+
+    public String getAssetIdentificationByAssetId(String assetId) {
+        List<Map<String, String>> assetIdentifications = assetInformationMapper.getAssetIdentificationByAssetId(assetId);
+        return assetIdentifications.stream()
+                .map(entry -> entry.get("type") + ":" + entry.get("identification"))
+                .collect(Collectors.joining(",", "(", ")"));
+
     }
 }

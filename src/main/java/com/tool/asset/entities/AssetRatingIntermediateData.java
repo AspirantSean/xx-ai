@@ -3,6 +3,7 @@ package com.tool.asset.entities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tool.asset.application.Starter;
+import com.tool.asset.dao.AssetInformationDao;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,6 +22,7 @@ import java.util.StringJoiner;
 public class AssetRatingIntermediateData {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final AssetInformationDao assetInformationDao = AssetInformationDao.getInstance();
 
     /**
      * 资产ID
@@ -90,7 +92,8 @@ public class AssetRatingIntermediateData {
             }
         }
         try {
-            Starter.logger.info("资产({})满足评级规则：{}", this.assetId, objectMapper.writeValueAsString(logRules));
+            String assetIdentification = assetInformationDao.getAssetIdentificationByAssetId(this.assetId);
+            Starter.logger.info("资产({}){}满足评级规则：{}", this.assetId, assetIdentification, objectMapper.writeValueAsString(logRules));
         } catch (JsonProcessingException e) {
             Starter.logger.error("资产评级规则序列化失败", e);
         }
