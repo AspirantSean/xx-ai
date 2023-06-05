@@ -77,7 +77,7 @@ start() {
     fi
 
     #启动程序
-    java $JAVA_OPTS $main_class $* 1>$EXT_HOME/logs/console.log 2>&1 &
+    java $JAVA_OPTS $main_class $*
     pid=$!
     echo $pid > /var/run/mirror_tools.pid
 

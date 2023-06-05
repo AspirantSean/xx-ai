@@ -79,7 +79,7 @@ public class Starter {
             String ratingTaskExecTime = AssetInformationDao.getInstance().getRatingTaskExecTime();
             if (StringUtils.isNotBlank(ratingTaskExecTime) && Long.parseLong(ratingTaskExecTime) > 10 * 60 * 1000) {
                 System.out.println("全量资产上次评级时间：" + ratingTaskExecTime + "ms，是否继续评级？");
-                System.out.println("    请输入\"是\"继续执行，\"否\"停止执行");
+                System.out.println("请输入\"是\"继续执行，\"否\"停止执行");
                 try (Scanner scanner = new Scanner(System.in)) {
                     String input = scanner.nextLine();
                     if ("否".equals(input)) {
