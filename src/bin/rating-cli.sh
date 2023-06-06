@@ -146,10 +146,10 @@ status() {
 help() {
     echo "用法：`basename $0` (start|stop|restart|status) [-h|--help] [args...]"
     echo "包含的命令："
-    echo "  start[ -ratingTime=yyyy-MM-dd_HH:mm:ss[ -assetIds={id1}[,{id2}[,{id3}...]][ -baasUrl={url}]]]"
-    echo "                  开启资产评级。示例：-ratingTime=2023-04-01_23:59:59 -assetIds=asset_1,asset_2,asset_3 -baasUrl=http://1.flink1:8999 -save=false"
+    echo "  start[ -ratingTimes=yyyy-MM-dd[ -assetIds={id1}[,{id2}[,{id3}...]][ -baasUrl={url}]]]"
+    echo "                  开启资产评级。示例：-ratingTimes=2023-04-01,2023-04-02 -assetIds=asset_1,asset_2,asset_3 -baasUrl=http://1.flink1:8999 -save=false"
     echo "                      参数解释："
-    echo "                          -ratingTime     评级时间，需评级当天任意时间，会自动将评级起止时间定位到ratingTime的当天0时0分0秒-23时59分59秒"
+    echo "                          -ratingTimes    评级时间，需评级当天日期，可逗号分隔输入多天，会自动将评级起止时间定位到ratingTime的当天0时0分0秒-23时59分59秒"
     echo "                          -assetIds       待评级资产id，英文逗号分隔，不可有空格"
     echo "                          -baasUrl        baas服务地址"
     echo "                          -save           评级结果是否存入数据库"

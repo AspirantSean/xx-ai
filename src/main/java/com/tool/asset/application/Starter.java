@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -21,10 +22,6 @@ import java.util.stream.Collectors;
  * @since 2023/5/30 16:32
  */
 public class Starter {
-
-    static {
-        System.setProperty("application.start.time", System.currentTimeMillis() + "");
-    }
 
     public static Logger logger = LoggerFactory.getLogger("ratingAssetLog");
 
@@ -67,7 +64,7 @@ public class Starter {
             saveResult = "true".equals(map.get("-save"));
             if (StringUtils.isNotBlank(_ratingTimes)) {
                 for (String _ratingTime : _ratingTimes.split(",")) {
-                    LocalDateTime date = LocalDateTime.parse(_ratingTime, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    LocalDateTime date = LocalDate.parse(_ratingTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay();
                     ratingTimes.add(LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 23, 59, 59).format(AssetRatingRule.dateTimeFormatter));// 设为当天最后的时间点
                 }
             } else {
