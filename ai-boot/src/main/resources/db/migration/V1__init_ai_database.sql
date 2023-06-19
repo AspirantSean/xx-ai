@@ -81,7 +81,7 @@ VALUES ('ARIMA', 'ARIMA',
 INSERT INTO "ailpha_ai_analysis_scene"
     (scene_id, scene_no, model_id, algorithm_id, is_enable, other)
 VALUES
-    ('场景1_create_or_update_time:1536652861860',1,'cdps-ai-sessionNumAnomaly','ARIMA','true',NULL),
-    ('场景2_create_or_update_time:1536296864525',2,'cdps-ai-bytesInAnomaly','RPCASST','true',NULL),
-    ('场景3_create_or_update_time:1536647527710',3,'cdps-ai-requestDomainNumAnomaly','ARIMA','true',NULL),
-    ('场景4_create_or_update_time:1536651875599',4,'cdps-ai-websiteAccessUnsuccessNumAnomaly','ExponentialSmoothing','true',NULL);
+    ('场景1_create_or_update_time:1536652861860',1,'sessionNumAnomaly','ARIMA','true',NULL),
+    ('场景2_create_or_update_time:1536296864525',2,'bytesInAnomaly','RPCASST','true',NULL),
+    ('场景3_create_or_update_time:1536647527710',3,'requestDomainNumAnomaly','ARIMA','true',NULL),
+    ('场景4_create_or_update_time:1536651875599',4,'websiteAccessUnsuccessNumAnomaly','ExponentialSmoothing','true',NULL);
