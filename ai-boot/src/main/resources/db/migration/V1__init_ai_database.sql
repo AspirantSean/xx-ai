@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS "ailpha_ai_analysis_algorithm";
 CREATE TABLE IF NOT EXISTS "ailpha_ai_analysis_algorithm"
 (
     "algorithm_id"   varchar(100) NOT NULL,
@@ -15,7 +14,6 @@ COMMENT ON COLUMN "ailpha_ai_analysis_algorithm"."other" IS '误差描述';
 COMMENT ON COLUMN "ailpha_ai_analysis_algorithm"."paper" IS '论文(格式[{"content":"论文描述","info":""}])';
 COMMENT ON COLUMN "ailpha_ai_analysis_algorithm"."patent" IS '专利(格式[{"content":"专利描述","info":"专利号"}])';
 
-DROP TABLE IF EXISTS "ailpha_ai_analysis_data";
 CREATE TABLE IF NOT EXISTS "ailpha_ai_analysis_data"
 (
     "id"            varchar(100) NOT NULL,
@@ -32,7 +30,6 @@ COMMENT ON COLUMN "ailpha_ai_analysis_data".ui_data IS '前端展示结果数据
 COMMENT ON COLUMN "ailpha_ai_analysis_data".model_id IS '模型id';
 COMMENT ON COLUMN "ailpha_ai_analysis_data".algorithm_id IS '算法id';
 
-DROP TABLE IF EXISTS "ailpha_ai_analysis_scene";
 CREATE TABLE IF NOT EXISTS "ailpha_ai_analysis_scene"
 (
     "scene_id"     varchar(100) NOT NULL,
@@ -76,7 +73,7 @@ VALUES ('ARIMA', 'ARIMA',
            "content": "一种网络流量异常检测方法及系统",
            "info": "201710803213.1"
          }
-       ]');
+       ]') ON CONFLICT DO NOTHING;
 
 INSERT INTO "ailpha_ai_analysis_scene"
     (scene_id, scene_no, model_id, algorithm_id, is_enable, other)
@@ -84,4 +81,4 @@ VALUES
     ('场景1_create_or_update_time:1536652861860',1,'sessionNumAnomaly','ARIMA','true',NULL),
     ('场景2_create_or_update_time:1536296864525',2,'bytesInAnomaly','RPCASST','true',NULL),
     ('场景3_create_or_update_time:1536647527710',3,'requestDomainNumAnomaly','ARIMA','true',NULL),
-    ('场景4_create_or_update_time:1536651875599',4,'websiteAccessUnsuccessNumAnomaly','ExponentialSmoothing','true',NULL);
+    ('场景4_create_or_update_time:1536651875599',4,'websiteAccessUnsuccessNumAnomaly','ExponentialSmoothing','true',NULL) ON CONFLICT DO NOTHING;
