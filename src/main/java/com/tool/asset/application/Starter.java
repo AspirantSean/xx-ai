@@ -25,7 +25,7 @@ public class Starter {
 
     public static Logger logger = LoggerFactory.getLogger("ratingAssetLog");
 
-    public static boolean saveResult = false;
+    public static volatile boolean saveResult = false;
 
     public static void main(String[] args) {
         List<String> ratingTimes = new ArrayList<>();
@@ -62,6 +62,7 @@ public class Starter {
             assetIds = map.get("-assetIds");
             baasUrl = map.get("-baasUrl");
             saveResult = "true".equals(map.get("-save"));
+            System.out.println("current rating app will store the result! save = " + saveResult);
             if (StringUtils.isNotBlank(_ratingTimes)) {
                 for (String _ratingTime : _ratingTimes.split(",")) {
                     LocalDateTime date = LocalDate.parse(_ratingTime, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay();
