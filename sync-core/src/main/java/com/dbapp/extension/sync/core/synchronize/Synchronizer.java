@@ -45,8 +45,8 @@ public class Synchronizer implements ISynchronizer {
 
     @Resource
     private IEsService iEsService;
-    @Resource
     @Lazy
+    @Resource
     private ISynchronizer iSynchronizer;
     @Resource
     private SynchronizerMapper synchronizerMapper;
