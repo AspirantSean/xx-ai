@@ -1,0 +1,9 @@
+{
+    "code":"sync",
+    "name":"sync server",
+    "description":"sync server",
+    "version":"${tag}",
+    "mainClass":"${ext.main.class}",
+    "dockerId":"1.sync1",
+    "deployPath":"/usr/hdp/2.5.3.0-37/bigdata/ailpha-ext/sync"
+}

@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dbapp.extension.sync.mapper.SynchronizerMapper">
+    <update id="createVersionTable" databaseId="postgres">
+        CREATE TABLE IF NOT EXISTS "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+        (
+            "id"        varchar(200) NOT NULL,
+            "version"   bigint       NOT NULL,
+            "sync_type" varchar(20)  NOT NULL DEFAULT 'none' check ("sync_type" in ('none', 'insert', 'update', 'delete', 'full')),
+            PRIMARY KEY ("id")
+        );
+        CREATE INDEX ${syncPrimaryVersionTableName}_index_version ON "${database}"."${schema}"."${syncPrimaryVersionTableName}" ("version");
+    </update>
+
+    <select id="existTrigger" resultType="java.lang.Boolean" databaseId="postgres">
+        SELECT EXISTS(
+                       SELECT 1
+                       FROM pg_trigger
+                       WHERE "tgname" = #{triggerName}
+                   );
+    </select>
+
+    <update id="createFirstTrigger" databaseId="postgres">
+        CREATE OR REPLACE FUNCTION "${database}"."${schema}".${functionName}()
+            RETURNS TRIGGER AS
+        $$
+        BEGIN
+            IF (TG_OP = 'INSERT') THEN
+                INSERT INTO "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                VALUES (NEW.${id}, CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT), 'insert');
+            ELSIF (TG_OP = 'UPDATE') THEN
+                UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                    "sync_type" = 'update'
+                WHERE "id" = OLD.${id};
+            ELSIF (TG_OP = 'DELETE') THEN
+                UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                    "sync_type" = 'delete'
+                WHERE "id" = OLD.${id};
+            ELSIF (TG_OP = 'TRUNCATE') THEN
+                UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                    "sync_type" = 'delete';
+            END IF;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        CREATE OR REPLACE TRIGGER ${functionName}_trigger
+            AFTER INSERT OR DELETE OR UPDATE
+            ON "${database}"."${schema}"."${notifyTableName}"
+            FOR EACH ROW
+        EXECUTE FUNCTION "${database}"."${schema}".${functionName}();
+
+        CREATE OR REPLACE TRIGGER ${functionName}_truncate
+            AFTER TRUNCATE
+            ON "${database}"."${schema}"."${notifyTableName}"
+            FOR EACH STATEMENT
+        EXECUTE FUNCTION "${database}"."${schema}".${functionName}();
+    </update>
+
+    <update id="createDirectEffectTrigger" databaseId="postgres">
+        CREATE OR REPLACE FUNCTION "${database}"."${schema}".${functionName}()
+            RETURNS TRIGGER AS
+        $$
+        BEGIN
+            IF (TG_OP = 'INSERT') THEN
+                UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                    "sync_type" = 'update'
+                WHERE "id" = NEW.${id};
+            ELSIF (TG_OP = 'UPDATE') THEN
+                UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                    "sync_type" = 'update'
+                WHERE "id" = OLD.${id};
+            ELSIF (TG_OP = 'DELETE') THEN
+                UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                    "sync_type" = 'update'
+                WHERE "id" = OLD.${id};
+            ELSIF (TG_OP = 'TRUNCATE') THEN
+                UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                    "sync_type" = 'update'
+                WHERE "id" IN (SELECT ${id} FROM ${notifyTableName});
+            END IF;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        CREATE OR REPLACE TRIGGER ${functionName}_trigger
+            AFTER INSERT OR DELETE OR UPDATE
+            ON "${database}"."${schema}"."${notifyTableName}"
+            FOR EACH ROW
+        EXECUTE FUNCTION "${database}"."${schema}".${functionName}();
+
+        CREATE OR REPLACE TRIGGER ${functionName}_truncate
+            BEFORE TRUNCATE
+            ON "${database}"."${schema}"."${notifyTableName}"
+            FOR EACH STATEMENT
+        EXECUTE FUNCTION "${database}"."${schema}".${functionName}();
+    </update>
+
+    <update id="createIndirectEffectTrigger" databaseId="postgres">
+        CREATE OR REPLACE FUNCTION "${database}"."${schema}".${functionName}()
+            RETURNS TRIGGER AS
+        $$
+            -- 声明变量
+        DECLARE
+            cursorData CURSOR FOR ${fetchSql};
+            rowData RECORD;
+        BEGIN
+            OPEN cursorData;
+            LOOP
+                FETCH cursorData INTO rowData;
+                EXIT WHEN NOT FOUND;
+
+                IF (TG_OP = 'INSERT') THEN
+                    UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                    SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                        "sync_type" = 'update'
+                    WHERE "id" = rowData.${id};
+                ELSIF (TG_OP = 'UPDATE') THEN
+                    UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                    SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                        "sync_type" = 'update'
+                    WHERE "id" = rowData.${id};
+                ELSIF (TG_OP = 'DELETE') THEN
+                    UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                    SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                        "sync_type" = 'update'
+                    WHERE "id" = rowData.${id};
+                ELSIF (TG_OP = 'TRUNCATE') THEN
+                    UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+                    SET "version"   = CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT),
+                        "sync_type" = 'update'
+                    WHERE "id" = rowData.${id};
+                END IF;
+            END LOOP;
+            CLOSE cursorData;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        CREATE OR REPLACE TRIGGER ${functionName}_trigger
+            AFTER INSERT OR DELETE OR UPDATE
+            ON "${database}"."${schema}"."${notifyTableName}"
+            FOR EACH ROW
+        EXECUTE FUNCTION "${database}"."${schema}".${functionName}();
+
+        CREATE OR REPLACE TRIGGER ${functionName}_truncate
+            BEFORE TRUNCATE
+            ON "${database}"."${schema}"."${notifyTableName}"
+            FOR EACH STATEMENT
+        EXECUTE FUNCTION "${database}"."${schema}".${functionName}();
+    </update>
+
+    <select id="existTable" resultType="java.lang.Boolean" databaseId="postgres">
+        SELECT EXISTS(SELECT 1
+                      FROM information_schema.tables
+                      WHERE "table_catalog" = #{database}
+                        AND "table_schema" = #{schema}
+                        AND "table_name" = #{tableName});
+    </select>
+
+    <select id="fetchTableName" resultType="java.lang.String" databaseId="postgres">
+        SELECT "table_name"
+        FROM information_schema.tables
+        WHERE "table_catalog" = #{database}
+          AND "table_schema" = #{schema}
+          AND "table_name" ILIKE #{tableNamePrefix};
+    </select>
+
+    <update id="createSyncVersionRecordTable" databaseId="postgres">
+        CREATE TABLE IF NOT EXISTS "${database}"."${schema}"."${syncVersionRecordTable}"
+        (
+            "version"      bigint      NOT NULL,
+            "last_version" bigint      NOT NULL,
+            "force"        bool        NOT NULL DEFAULT false,
+            "description"  varchar(500),
+            "status"       varchar(20) NOT NULL DEFAULT 'none' check ("status" in ('New', 'Synchronizing', 'Success', 'Failed')),
+            "times"        int         NOT NULL DEFAULT 1,
+            "took"         bigint               DEFAULT NULL,
+            "total"        int         NOT NULL DEFAULT 0,
+            "create_time"  timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "sync_time"    timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "finish_time"  timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY ("version")
+        );
+        CREATE INDEX ${syncVersionRecordTable}_index_status ON "${database}"."${schema}"."${syncVersionRecordTable}" ("status");
+    </update>
+
+    <select id="getUnsuccessfulVersions" resultType="com.dbapp.extension.sync.model.dto.UpdateVersion"
+            databaseId="postgres">
+        SELECT *
+        FROM ${syncVersionRecordTable}
+        WHERE "status" != 'Success'
+        ORDER BY "version"
+    </select>
+
+    <update id="updateUnsuccessfulVersions" databaseId="postgres">
+        UPDATE ${syncVersionRecordTable}
+        SET "status" = 'Success'
+        WHERE "status" != 'Success'
+    </update>
+
+    <select id="getSuccessUpdateVersion" resultType="com.dbapp.extension.sync.model.dto.UpdateVersion"
+            databaseId="postgres">
+        SELECT *
+        FROM ${syncVersionRecordTable}
+        WHERE "status" = 'Success'
+        ORDER BY "version" DESC
+        LIMIT 1;
+    </select>
+
+    <select id="getUpdateVersionByVersion" resultType="com.dbapp.extension.sync.model.dto.UpdateVersion"
+            databaseId="postgres">
+        SELECT *
+        FROM ${syncVersionRecordTable}
+        WHERE "version" = #{version};
+    </select>
+
+    <insert id="insertUpdateVersion" databaseId="postgres">
+        INSERT INTO ${syncVersionRecordTable} ("version",
+                                               "last_version",
+                                               "force",
+                                               "total",
+                                               "description",
+                                               "status")
+        VALUES (#{updateVersion.version},
+                #{updateVersion.lastVersion},
+                #{updateVersion.force},
+                #{updateVersion.total},
+                #{updateVersion.description},
+                #{updateVersion.status})
+        ON CONFLICT("version") DO UPDATE SET "description" = EXCLUDED.description,
+                                             "status"      = EXCLUDED.status,
+                                             "total"       = EXCLUDED.total,
+                                             "times"       = EXCLUDED.times + 1,
+                                             "sync_time"   = CURRENT_TIMESTAMP,
+                                             "finish_time" = CURRENT_TIMESTAMP,
+                                             "took"        = EXCLUDED.took
+    </insert>
+
+    <update id="updateSyncVersionRecord" databaseId="postgres">
+        UPDATE ${syncVersionRecordTable}
+        SET "description" = #{updateVersion.description},
+            "status"      = #{updateVersion.status},
+            "took"        = #{updateVersion.took},
+            "finish_time" = CURRENT_TIMESTAMP
+        WHERE "version" = #{updateVersion.version}
+    </update>
+
+    <update id="createIncrementalView" databaseId="postgres">
+        CREATE OR REPLACE VIEW ${versionViewName}
+        AS
+        SELECT "id", "version", "sync_type"
+        FROM ${syncPrimaryVersionTableName}
+        WHERE "version" >= ${lastVersion}
+          AND "version" <![CDATA[<]]> ${currentVersion}
+        <if test="!force">
+            AND "sync_type" != 'full';
+        </if>
+    </update>
+
+    <insert id="dropIncrementalView" databaseId="postgres">
+        DROP VIEW IF EXISTS ${versionViewName};
+    </insert>
+
+    <select id="traverseIncrementalView" resultType="java.util.Map" databaseId="postgres">
+        SELECT "id", "sync_type" AS syncType
+        FROM ${versionViewName}
+        LIMIT #{limit}
+    </select>
+
+    <select id="queryData" resultType="java.util.Map" databaseId="postgres">
+        ${sql}
+    </select>
+
+    <update id="updateSyncVersion" databaseId="postgres">
+        UPDATE "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+        SET "sync_type" = 'full'
+        <if test="force">
+            , "version" = CASE WHEN "version" > #{version} THEN "version" ELSE #{version} END
+        </if>
+        WHERE "id" IN
+        <foreach collection="ids" open="(" item="id" separator="," close=")" nullable="true">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="deleteSyncVersion" databaseId="postgres">
+        DELETE
+        FROM "${database}"."${schema}"."${syncPrimaryVersionTableName}"
+        WHERE "sync_type" = 'delete'
+          AND "id" IN
+        <foreach collection="ids" open="(" item="id" separator="," close=")" nullable="true">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="countSyncNumber" resultType="java.lang.Integer" databaseId="postgres">
+        SELECT COUNT("id")
+        FROM ${versionViewName}
+    </select>
+
+    <select id="countSyncVersionWhichLeft" resultType="java.lang.Integer" databaseId="postgres">
+        SELECT COUNT(a.${id})
+        FROM "${database}"."${schema}"."${primaryTable}" AS a
+                 LEFT JOIN "${database}"."${schema}"."${syncPrimaryVersionTableName}" AS b ON a.${id} = b."id"
+        WHERE b."id" IS NULL
+    </select>
+
+    <insert id="insertSyncVersionWhichLeft" databaseId="postgres">
+        INSERT INTO "${database}"."${schema}"."${syncPrimaryVersionTableName}" ("id", "version", "sync_type")
+        SELECT ${id}, CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT), 'none'
+        FROM "${database}"."${schema}"."${primaryTable}" AS a
+        WHERE NOT EXISTS(SELECT 1
+                         FROM "${database}"."${schema}"."${syncPrimaryVersionTableName}" AS b
+                         WHERE a.${id} = b."id")
+    </insert>
+</mapper>

@@ -1,0 +1,525 @@
+{
+  "database": "ailpha",
+  "index": "t_asset_information",
+  "nodes": {
+    "table": "t_asset_information",
+    "schema": "bigdata_web",
+    "key": "asset_id",
+    "columns": [
+      "asset_id",
+      "asset_name",
+      "asset_importance",
+      "asset_label",
+      "asset_type",
+      "org_id",
+      "net_id",
+      "asset_owner",
+      "asset_source_model",
+      "asset_source",
+      "edr_asset_source",
+      "edr_id",
+      "asset_number",
+      "asset_use_state",
+      "asset_user",
+      "asset_confidentiality",
+      "asset_integrity",
+      "asset_usability",
+      "asset_level_protection",
+      "asset_localization",
+      "asset_iot",
+      "asset_idc",
+      "asset_geo_region",
+      "asset_geo_detailed_address",
+      "asset_describe",
+      "os_type",
+      "os_version",
+      "os",
+      "kernel_version",
+      "cpu_info",
+      "memory_info",
+      "hd_info",
+      "gpu_info",
+      "device_factory",
+      "device_model",
+      "device_version",
+      "asset_region",
+      "asset_management_enable",
+      "asset_management_address",
+      "asset_online_monitor",
+      "asset_online_monitor_type",
+      "asset_online_monitor_cycle",
+      "confirm",
+      "from_subordinate_platform",
+      "platform_codes",
+      "update_time",
+      "create_time",
+      "warehouse_time",
+      "field_source",
+      "extra_field"
+    ],
+    "transform": {
+      "rename": {
+        "asset_id": "assetId",
+        "asset_name": "assetName",
+        "asset_importance": "assetImportance",
+        "asset_label": "assetLabel",
+        "asset_type": "assetType",
+        "org_id": "orgId",
+        "net_id": "netId",
+        "asset_owner": "assetOwner",
+        "asset_source_model": "assetSourceModel",
+        "asset_source": "assetSource",
+        "edr_asset_source": "edrAssetSource",
+        "edr_id": "edrId",
+        "asset_number": "assetNumber",
+        "asset_use_state": "assetUseState",
+        "asset_user": "assetUser",
+        "asset_confidentiality": "assetConfidentiality",
+        "asset_integrity": "assetIntegrity",
+        "asset_usability": "assetUsability",
+        "asset_level_protection": "assetLevelProtection",
+        "asset_localization": "assetLocalization",
+        "asset_iot": "assetIot",
+        "asset_idc": "assetIdc",
+        "asset_geo_region": "assetGeoRegion",
+        "asset_geo_detailed_address": "assetGeoDetailedAddress",
+        "asset_describe": "assetDescribe",
+        "os_type": "osType",
+        "os_version": "osVersion",
+        "os": "os",
+        "kernel_version": "kernelVersion",
+        "cpu_info": "cpuInfo",
+        "memory_info": "memoryInfo",
+        "hd_info": "hdInfo",
+        "gpu_info": "gpuInfo",
+        "device_factory": "deviceFactory",
+        "device_model": "deviceModel",
+        "device_version": "deviceVersion",
+        "asset_region": "assetRegion",
+        "asset_management_enable": "assetManagementEnable",
+        "asset_management_address": "assetManagementAddress",
+        "asset_online_monitor": "assetOnlineMonitor",
+        "asset_online_monitor_type": "assetOnlineMonitorType",
+        "asset_online_monitor_cycle": "assetOnlineMonitorCycle",
+        "confirm": "confirm",
+        "from_subordinate_platform": "fromSubordinatePlatform",
+        "platform_codes": "platformCodes",
+        "update_time": "updateTime",
+        "create_time": "createTime",
+        "warehouse_time": "warehouseTime",
+        "field_source": "fieldSource",
+        "extra_field": "extraField"
+      }
+    },
+    "children": [
+      {
+        "table": "t_asset_identification",
+        "label": "assetIdentifications",
+        "schema": "bigdata_web",
+        "key": "id",
+        "columns": [
+          "id",
+          "asset_id",
+          "net_id",
+          "identification_type",
+          "format_type",
+          "identification",
+          "ip_type",
+          "ip_hex",
+          "order"
+        ],
+        "transform": {
+          "rename": {
+            "id": "id",
+            "asset_id": "assetId",
+            "net_id": "netId",
+            "identification_type": "identificationType",
+            "format_type": "formatType",
+            "identification": "identification",
+            "ip_type": "ipType",
+            "ip_hex": "ipHex",
+            "order": "order"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_many",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_relation_contact",
+        "label": "relationContacts",
+        "schema": "bigdata_web",
+        "key": "id",
+        "columns": [
+          "id",
+          "relation_type",
+          "relation_id",
+          "contact_name",
+          "contact_telephone",
+          "contact_email",
+          "order"
+        ],
+        "transform": {
+          "rename": {
+            "id": "id",
+            "relation_type": "relationType",
+            "relation_id": "relationId",
+            "contact_name": "contactName",
+            "contact_telephone": "contactTelephone",
+            "contact_email": "contactEmail",
+            "order": "order"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_many",
+          "foreign_key": {
+            "child": [
+              "relation_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_asset_statistical_results_write",
+        "label": "assetStatisticalResult",
+        "schema": "bigdata_web",
+        "key": "asset_id",
+        "columns": [
+          "asset_id",
+          "last_up_time",
+          "asset_state",
+          "asset_high_vulnerabilities",
+          "asset_medium_vulnerabilities",
+          "asset_low_vulnerabilities",
+          "seven_days_high_alarm",
+          "seven_days_medium_alarm",
+          "seven_days_low_alarm",
+          "today_log_num",
+          "edr_protection_state",
+          "version_object",
+          "update_time",
+          "create_time"
+        ],
+        "transform": {
+          "rename": {
+            "asset_id": "assetId",
+            "last_up_time": "lastUpTime",
+            "asset_state": "assetState",
+            "asset_high_vulnerabilities": "assetHighVulnerabilities",
+            "asset_medium_vulnerabilities": "assetMediumVulnerabilities",
+            "asset_low_vulnerabilities": "assetLowVulnerabilities",
+            "seven_days_high_alarm": "sevenDaysHighAlarm",
+            "seven_days_medium_alarm": "sevenDaysMediumAlarm",
+            "seven_days_low_alarm": "sevenDaysLowAlarm",
+            "today_log_num": "todayLogNum",
+            "edr_protection_state": "edrProtectionState",
+            "version_object": "versionObject",
+            "update_time": "updateTime",
+            "create_time": "createTime"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_one",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_asset_rating",
+        "label": "assetRating",
+        "schema": "bigdata_web",
+        "key": "id",
+        "columns": [
+          "id",
+          "asset_id",
+          "asset_health_state",
+          "asset_score",
+          "rating_time",
+          "tags",
+          "rate_group",
+          "from_subordinate_platform",
+          "create_time"
+        ],
+        "transform": {
+          "rename": {
+            "id": "id",
+            "asset_id": "assetId",
+            "asset_health_state": "assetHealthState",
+            "asset_score": "assetScore",
+            "rating_time": "ratingTime",
+            "tags": "tags",
+            "rate_group": "rateGroup",
+            "from_subordinate_platform": "fromSubordinatePlatform",
+            "create_time": "createTime"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_many",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_asset_solidified_label",
+        "label": "assetSolidifiedLabel",
+        "schema": "bigdata_web",
+        "key": "asset_id",
+        "columns": [
+          "asset_id",
+          "device",
+          "linkage_device_status",
+          "is_web_system",
+          "probe",
+          "datasource",
+          "create_time",
+          "update_time"
+        ],
+        "transform": {
+          "rename": {
+            "asset_id": "assetId",
+            "device": "device",
+            "linkage_device_status": "linkageDeviceStatus",
+            "is_web_system": "isWebSystem",
+            "probe": "probe",
+            "datasource": "datasource",
+            "create_time": "createTime",
+            "update_time": "updateTime"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_one",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_asset_software",
+        "label": "assetSoftware",
+        "schema": "bigdata_web",
+        "key": "id",
+        "columns": [
+          "id",
+          "asset_id",
+          "name",
+          "publisher",
+          "version",
+          "install_path",
+          "create_time",
+          "update_time"
+        ],
+        "transform": {
+          "rename": {
+            "id": "id",
+            "asset_id": "assetId",
+            "name": "name",
+            "publisher": "publisher",
+            "version": "version",
+            "install_path": "installPath",
+            "create_time": "createTime",
+            "update_time": "updateTime"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_many",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_asset_account",
+        "label": "assetAccounts",
+        "schema": "bigdata_web",
+        "key": "id",
+        "columns": [
+          "id",
+          "asset_id",
+          "user_name",
+          "root",
+          "gid",
+          "status",
+          "password_expire",
+          "logon_type",
+          "last_logon_time",
+          "create_time",
+          "update_time"
+        ],
+        "transform": {
+          "rename": {
+            "id": "id",
+            "asset_id": "assetId",
+            "user_name": "userName",
+            "root": "root",
+            "gid": "gid",
+            "status": "status",
+            "password_expire": "passwordExpire",
+            "logon_type": "logonType",
+            "last_logon_time": "lastLogonTime",
+            "create_time": "createTime",
+            "update_time": "updateTime"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_many",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_asset_process",
+        "label": "assetProcesses",
+        "schema": "bigdata_web",
+        "key": "id",
+        "columns": [
+          "id",
+          "asset_id",
+          "name",
+          "path",
+          "mem_used",
+          "cpu_used",
+          "command_line",
+          "start_time",
+          "user_name",
+          "pname",
+          "create_time",
+          "update_time"
+        ],
+        "transform": {
+          "rename": {
+            "id": "id",
+            "asset_id": "assetId",
+            "name": "name",
+            "path": "path",
+            "mem_used": "memUsed",
+            "cpu_used": "cpuUsed",
+            "command_line": "commandLine",
+            "start_time": "startTime",
+            "user_name": "userName",
+            "pname": "pname",
+            "create_time": "createTime",
+            "update_time": "updateTime"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_many",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      },
+      {
+        "table": "t_asset_monitor_port_info",
+        "label": "assetPorts",
+        "schema": "bigdata_web",
+        "key": "id",
+        "columns": [
+          "id",
+          "asset_id",
+          "asset_ip",
+          "port",
+          "protocol",
+          "service_name",
+          "server_version",
+          "status",
+          "message",
+          "find_time",
+          "create_time",
+          "update_time",
+          "source",
+          "fingerprint_name",
+          "fingerprint_class2",
+          "vendor_name",
+          "tag",
+          "fingerprint_version"
+        ],
+        "transform": {
+          "rename": {
+            "id": "id",
+            "asset_id": "assetId",
+            "asset_ip": "assetIp",
+            "port": "port",
+            "protocol": "protocol",
+            "service_name": "serviceName",
+            "server_version": "serverVersion",
+            "status": "status",
+            "message": "message",
+            "find_time": "findTime",
+            "create_time": "createTime",
+            "update_time": "updateTime",
+            "source": "source",
+            "fingerprint_name": "fingerprintName",
+            "fingerprint_class2": "fingerprintClass2",
+            "vendor_name": "vendorName",
+            "tag": "tag",
+            "fingerprint_version": "fingerprintVersion"
+          }
+        },
+        "relationship": {
+          "variant": "object",
+          "type": "one_to_many",
+          "foreign_key": {
+            "child": [
+              "asset_id"
+            ],
+            "parent": [
+              "asset_id"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
