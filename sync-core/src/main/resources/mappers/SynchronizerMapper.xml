@@ -238,7 +238,7 @@
         ON CONFLICT("version") DO UPDATE SET "description" = EXCLUDED.description,
                                              "status"      = EXCLUDED.status,
                                              "total"       = EXCLUDED.total,
-                                             "times"       = EXCLUDED.times + 1,
+                                             "times"       = #{updateVersion.times} + 1,
                                              "sync_time"   = CURRENT_TIMESTAMP,
                                              "finish_time" = CURRENT_TIMESTAMP,
                                              "took"        = EXCLUDED.took
@@ -272,7 +272,7 @@
     <select id="traverseIncrementalView" resultType="java.util.Map" databaseId="postgres">
         SELECT "id", "sync_type" AS syncType
         FROM ${versionViewName}
-        LIMIT #{limit}
+        LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <select id="queryData" resultType="java.util.Map" databaseId="postgres">

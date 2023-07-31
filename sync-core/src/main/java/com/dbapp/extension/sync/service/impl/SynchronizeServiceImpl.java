@@ -1,6 +1,6 @@
 package com.dbapp.extension.sync.service.impl;
 
-import com.dbapp.extension.sync.core.synchronize.Synchronizer;
+import com.dbapp.extension.sync.core.synchronize.ISynchronizer;
 import com.dbapp.extension.sync.enums.SyncType;
 import com.dbapp.extension.sync.restful.entity.ErrorCode;
 import com.dbapp.extension.sync.restful.response.ApiResponse;
@@ -17,13 +17,13 @@ import java.util.Map;
 public class SynchronizeServiceImpl implements ISynchronizeService {
 
     @Resource
-    private Synchronizer synchronizer;
+    private ISynchronizer iSynchronizer;
 
 
     @Override
     public ApiResponse<?> fullSynchronization(boolean force) {
         try {
-            return ApiResponse.success(synchronizer.fullSynchronization(force))
+            return ApiResponse.success(iSynchronizer.fullSynchronization(false, force))
                     .build();
         } catch (Exception e) {
             log.error("数据同步异常", e);
@@ -42,7 +42,7 @@ public class SynchronizeServiceImpl implements ISynchronizeService {
     @Override
     public ApiResponse<?> incrementalSynchronizationById(SyncType syncType, List<String> ids) {
         try {
-            return ApiResponse.success(synchronizer.incrementalSynchronizationById(syncType, ids))
+            return ApiResponse.success(iSynchronizer.incrementalSynchronizationById(syncType, ids))
                     .prop("message", "同步结束")
                     .prop("info", "结果集为失败的id集合")
                     .build();
@@ -63,7 +63,7 @@ public class SynchronizeServiceImpl implements ISynchronizeService {
     @Override
     public ApiResponse<?> incrementalSynchronizationByObject(List<Map<String, Object>> data) {
         try {
-            return ApiResponse.success(synchronizer.incrementalSynchronizationByObject(data))
+            return ApiResponse.success(iSynchronizer.incrementalSynchronizationByObject(data))
                     .prop("message", "同步结束")
                     .prop("info", "结果集为失败的id集合")
                     .build();

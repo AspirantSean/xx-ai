@@ -12,6 +12,7 @@ import com.dbapp.extension.sync.model.ao.SyncTableConfig;
 import com.dbapp.extension.sync.model.ao.SyncTableIDefinition;
 import com.dbapp.extension.sync.model.dto.UpdateVersion;
 import com.dbapp.extension.sync.prototype.es.IEsService;
+import com.dbapp.extension.sync.util.GlobalAttribute;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.ActionListener;
@@ -20,7 +21,9 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -30,16 +33,21 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.elasticsearch.client.Requests.INDEX_CONTENT_TYPE;
 
 @Slf4j
 @Component
-public class Synchronizer {
+public class Synchronizer implements ISynchronizer {
 
     @Resource
     private IEsService iEsService;
+    @Resource
+    @Lazy
+    private ISynchronizer iSynchronizer;
     @Resource
     private SynchronizerMapper synchronizerMapper;
     @Resource
@@ -62,7 +70,8 @@ public class Synchronizer {
     /**
      * 全量同步
      */
-    public UpdateVersion fullSynchronization(boolean force) {
+    @Override
+    public UpdateVersion fullSynchronization(boolean wait, boolean force) {
         // 全量同步版本号设置
         UpdateVersion currentVersion = UpdateVersion.builder()
                 .version(System.currentTimeMillis())
@@ -71,15 +80,25 @@ public class Synchronizer {
                 .status(SyncStatus.New)
                 .description("开始全量同步任务，请勿重复执行！")
                 .build();
-        doFullSynchronization(currentVersion);
-        return currentVersion.clone();
+        if (wait) {
+            try {
+                return iSynchronizer.doFullSynchronization(currentVersion).get();
+            } catch (Exception e) {
+                return currentVersion.clone();
+            }
+        } else {
+            return currentVersion.clone();
+        }
     }
 
     @Async
-    protected void doFullSynchronization(UpdateVersion currentVersion) {
+    @Override
+    public Future<UpdateVersion> doFullSynchronization(UpdateVersion currentVersion) {
         incrementalSynchronizationByVersion(currentVersion);
+        return new AsyncResult<>(currentVersion.clone());
     }
 
+    @Override
     public void incrementalSynchronizationByVersion(UpdateVersion currentVersion) {
         // 开始时间
         long start = System.currentTimeMillis();
@@ -100,96 +119,19 @@ public class Synchronizer {
                         currentVersion.isForce());
             }
             // 遍历视图数据
-            int tryTimes = 0;
+            final AtomicInteger tryTimes = new AtomicInteger(0);
             int batchSize = 30000;
             int leftCount = synchronizerMapper.countSyncNumber(versionViewName);
             // 记录版本情况
             currentVersion.setStatus(SyncStatus.Synchronizing);
+            currentVersion.setTotal(leftCount);
             synchronizerMapper.insertUpdateVersion(datasourceDefinition.getSyncVersionRecordTable(), currentVersion);
             while (leftCount > 0) {
-                // todo 将数据分线程执行
-
-
-                List<Map<String, Object>> syncData = synchronizerMapper.traverseIncrementalView(versionViewName, batchSize);
-                if (syncData.isEmpty()) {
-                    break;
-                }
-                Map<Boolean, List<Map<String, Object>>> syncDataMap = syncData.stream()
-                        .collect(Collectors.partitioningBy(syncDatum -> SyncType.delete.name().equals(syncDatum.get("syncType"))));
-                // 失败条目
-                List<String> failedData = new ArrayList<>();
-                // 任务结果
-                List<Future<List<String>>> futures = new ArrayList<>();
-                // 删除不存在的资产
-                List<String> deleteIds = syncDataMap.get(Boolean.TRUE)
-                        .stream()
-                        .map(syncDatum -> String.valueOf(syncDatum.get("id")))
-                        .collect(Collectors.toList());
-                if (!deleteIds.isEmpty()) {
-                    // 切分成3000一个线程执行删除同步
-                    futures.addAll(Lists.partition(deleteIds, 3000)
-                            .stream()
-                            .map(ArrayList::new)
-                            .map(deleteIdList -> threadPoolExecutor.submit(() -> {
-                                List<String> failedDeleteIds = deleteSynchronizeData(deleteIdList);
-                                // 修改视图中删除成功条目数据的version
-                                if (!failedDeleteIds.isEmpty()) {
-                                    // 移除失败条目
-                                    deleteIdList.removeAll(failedDeleteIds);
-                                }
-                                if (!deleteIdList.isEmpty()) {
-                                    // 修改成功条目
-                                    synchronizerMapper.deleteSyncVersion(database, schema, syncTableIDefinition.getVersionTableName(), deleteIdList);
-                                }
-                                return failedDeleteIds;
-                            }))
-                            .collect(Collectors.toList()));
-                }
-                // 待同步数据
-                List<Map<String, Object>> syncList = syncDataMap.get(Boolean.FALSE);
-                if (!syncList.isEmpty()) {
-                    // 切分成3000一个线程进行同步
-                    futures.addAll(Lists.partition(syncList, 3000)
-                            .stream()
-                            .map(syncVersionList -> threadPoolExecutor.submit(() -> {
-                                // 同步数据的id列表
-                                List<String> syncIdList = syncVersionList.stream()
-                                        .map(syncDatum -> String.valueOf(syncDatum.get("id")))
-                                        .collect(Collectors.toList());
-                                // 查询业务数据 数据写入es
-                                List<String> failedSyncIds = incrementalSynchronizationByObject(Lists.partition(syncIdList, 300)
-                                        .stream()
-                                        .map(subSyncIdList -> queryDataByIds(syncTableIDefinition, subSyncIdList))
-                                        .flatMap(Collection::stream)
-                                        .collect(Collectors.toList()));
-                                // 修改视图中同步成功条目数据的version
-                                if (!failedSyncIds.isEmpty()) {
-                                    // 移除失败条目
-                                    syncIdList.removeAll(failedSyncIds);
-                                }
-                                if (!syncIdList.isEmpty()) {
-                                    // 修改成功条目
-                                    synchronizerMapper.updateSyncVersion(
-                                            database, schema, syncTableIDefinition.getVersionTableName(),
-                                            syncIdList, currentVersion.getVersion(), currentVersion.isForce());
-                                }
-                                return failedSyncIds;
-                            }))
-                            .collect(Collectors.toList()));
-                }
-                // 等待结束
-                futures.forEach(future -> {
-                    try {
-                        // 整合失败条目
-                        failedData.addAll(future.get());
-                    } catch (Exception e) {
-                        log.error("同步任务执行失败，线程池调度执行异常", e);
-                    }
-                });
+                List<String> failedData = syncUseThreadPool(currentVersion,
+                        syncTableIDefinition, database, schema, versionViewName, leftCount, batchSize);
                 // 判断是否全部成功
                 if (!failedData.isEmpty()) {
-                    tryTimes++;
-                    if (tryTimes >= 5) {
+                    if (tryTimes.incrementAndGet() >= 5) {
                         // 处理重试tryTimes次后依旧失败的数据
                         String message = "重试" + 5 + "次后仍旧失败，elasticsearch批量写入报错。失败条目id：" + String.join("、", failedData) + " 等";
                         currentVersion.setDescription(message);
@@ -198,21 +140,18 @@ public class Synchronizer {
                         log.error(message);
                         break;
                     } else {
-                        currentVersion.setDescription("重试" + (tryTimes + 1) + "次失败，elasticsearch批量写入报错。失败条目id：" + String.join("、", failedData) + " 等");
+                        currentVersion.setDescription("重试" + tryTimes.get() + "次失败，elasticsearch批量写入报错。失败条目id：" + String.join("、", failedData) + " 等");
                         currentVersion.setStatus(SyncStatus.Synchronizing);
                         synchronizerMapper.updateSyncVersionRecord(datasourceDefinition.getSyncVersionRecordTable(), currentVersion);
                     }
                     continue;
                 }
-
-
                 int left = synchronizerMapper.countSyncNumber(versionViewName);
                 if (left >= leftCount) {// 失败
-                    tryTimes++;
-                    if (tryTimes >= 5) {
+                    if (tryTimes.incrementAndGet() >= 5) {
                         // 处理重试tryTimes次后依旧失败的数据
-                        String message = "重试" + tryTimes + "次后仍旧失败。失败条目id："
-                                + synchronizerMapper.traverseIncrementalView(versionViewName, 10)
+                        String message = "重试" + tryTimes.get() + "次后仍旧失败，剩余" + left + "条。失败条目id："
+                                + synchronizerMapper.traverseIncrementalView(versionViewName, 10, 0)
                                 .stream()
                                 .map(syncDatum -> String.valueOf(syncDatum.get("id"))).collect(Collectors.joining("、"))
                                 + " 等";
@@ -222,7 +161,7 @@ public class Synchronizer {
                         log.error(message);
                         break;
                     } else {
-                        currentVersion.setDescription("重试" + tryTimes + "次失败，当次同步后待同步资产未减少");
+                        currentVersion.setDescription("重试" + tryTimes.get() + "次失败，当次同步后待同步资产未减少，剩余" + left + "条");
                         currentVersion.setStatus(SyncStatus.Synchronizing);
                         synchronizerMapper.updateSyncVersionRecord(datasourceDefinition.getSyncVersionRecordTable(), currentVersion);
                     }
@@ -250,6 +189,126 @@ public class Synchronizer {
         }
     }
 
+    private List<String> syncUseThreadPool(UpdateVersion currentVersion,
+                                           SyncTableIDefinition syncTableIDefinition,
+                                           String database,
+                                           String schema,
+                                           String versionViewName,
+                                           int leftCount,
+                                           int batchSize) {
+        if ("true".equals(GlobalAttribute.getPropertyString("use.thread.sync", "false"))) {
+            // 将数据分线程执行
+            List<Future<List<String>>> futureTasks = Stream.iterate(0, index -> index + 1)
+                    .limit((leftCount + batchSize - 1) / batchSize)
+                    .map(index -> primaryThreadPoolExecutor.submit(
+                            () -> doSyncUseThreadPool(currentVersion, syncTableIDefinition, database,
+                                    schema, versionViewName, batchSize, index)))
+                    .collect(Collectors.toList());
+            // 等待结束
+            return futureTasks.stream()
+                    .map(future -> {
+                        try {
+                            // 整合失败条目
+                            return future.get();
+                        } catch (Exception e) {
+                            log.error("同步任务执行失败，线程池调度执行异常", e);
+                            return new ArrayList<String>();
+                        }
+                    })
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+        } else {
+            return doSyncUseThreadPool(currentVersion, syncTableIDefinition,
+                    database, schema, versionViewName, batchSize, 0);
+        }
+    }
+
+    private List<String> doSyncUseThreadPool(UpdateVersion currentVersion,
+                                             SyncTableIDefinition syncTableIDefinition,
+                                             String database,
+                                             String schema,
+                                             String versionViewName,
+                                             int batchSize,
+                                             int index) {
+        List<Map<String, Object>> syncData = synchronizerMapper.traverseIncrementalView(versionViewName, batchSize, index * batchSize);
+        if (syncData.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Map<Boolean, List<Map<String, Object>>> syncDataMap = syncData.stream()
+                .collect(Collectors.partitioningBy(syncDatum -> SyncType.delete.name().equals(syncDatum.get("syncType"))));
+        // 失败条目
+        List<String> failedData = new ArrayList<>();
+        // 任务结果
+        List<Future<List<String>>> futures = new ArrayList<>();
+        // 删除不存在的资产
+        List<String> deleteIds = syncDataMap.get(Boolean.TRUE)
+                .stream()
+                .map(syncDatum -> String.valueOf(syncDatum.get("id")))
+                .collect(Collectors.toList());
+        if (!deleteIds.isEmpty()) {
+            // 切分成3000一个线程执行删除同步
+            futures.addAll(Lists.partition(deleteIds, 3000)
+                    .stream()
+                    .map(ArrayList::new)
+                    .map(deleteIdList -> threadPoolExecutor.submit(() -> {
+                        List<String> failedDeleteIds = deleteSynchronizeData(deleteIdList);
+                        // 修改视图中删除成功条目数据的version
+                        if (!failedDeleteIds.isEmpty()) {
+                            // 移除失败条目
+                            deleteIdList.removeAll(failedDeleteIds);
+                        }
+                        if (!deleteIdList.isEmpty()) {
+                            // 修改成功条目
+                            synchronizerMapper.deleteSyncVersion(database, schema, syncTableIDefinition.getVersionTableName(), deleteIdList);
+                        }
+                        return failedDeleteIds;
+                    }))
+                    .collect(Collectors.toList()));
+        }
+        // 待同步数据
+        List<Map<String, Object>> syncList = syncDataMap.get(Boolean.FALSE);
+        if (!syncList.isEmpty()) {
+            // 切分成3000一个线程进行同步
+            futures.addAll(Lists.partition(syncList, 3000)
+                    .stream()
+                    .map(syncVersionList -> threadPoolExecutor.submit(() -> {
+                        // 同步数据的id列表
+                        List<String> syncIdList = syncVersionList.stream()
+                                .map(syncDatum -> String.valueOf(syncDatum.get("id")))
+                                .collect(Collectors.toList());
+                        // 查询业务数据 数据写入es
+                        List<String> failedSyncIds = incrementalSynchronizationByObject(Lists.partition(syncIdList, 300)
+                                .stream()
+                                .map(subSyncIdList -> queryDataByIds(syncTableIDefinition, subSyncIdList))
+                                .flatMap(Collection::stream)
+                                .collect(Collectors.toList()));
+                        // 修改视图中同步成功条目数据的version
+                        if (!failedSyncIds.isEmpty()) {
+                            // 移除失败条目
+                            syncIdList.removeAll(failedSyncIds);
+                        }
+                        if (!syncIdList.isEmpty()) {
+                            // 修改成功条目
+                            synchronizerMapper.updateSyncVersion(
+                                    database, schema, syncTableIDefinition.getVersionTableName(),
+                                    syncIdList, currentVersion.getVersion(), currentVersion.isForce());
+                        }
+                        return failedSyncIds;
+                    }))
+                    .collect(Collectors.toList()));
+        }
+        // 等待结束
+        futures.forEach(future -> {
+            try {
+                // 整合失败条目
+                failedData.addAll(future.get());
+            } catch (Exception e) {
+                log.error("同步任务执行失败，线程池调度执行异常", e);
+            }
+        });
+        return failedData;
+    }
+
     private List<Map<String, Object>> queryDataByIds(SyncTableIDefinition syncTableIDefinition, List<String> ids) {
         SyncTableConfig syncTableConfig = syncTableIDefinition.getSyncTableConfig();
         Mapping mapping = syncTableIDefinition.getMapping();
@@ -266,6 +325,7 @@ public class Synchronizer {
      * @param ids
      * @return
      */
+    @Override
     public List<String> incrementalSynchronizationById(SyncType syncType, List<String> ids) {
         // 结果集
         List<String> failedData = new ArrayList<>();
@@ -296,6 +356,7 @@ public class Synchronizer {
         return failedData;
     }
 
+    @Override
     public List<String> deleteSynchronizeData(List<String> ids) {
         String index = datasourceDefinition.getDatabaseConfig().getIndex();
         List<String> failedData = new ArrayList<>();
@@ -328,6 +389,7 @@ public class Synchronizer {
      * @param data
      * @return
      */
+    @Override
     public List<String> incrementalSynchronizationByObject(List<Map<String, Object>> data) {
         String index = datasourceDefinition.getDatabaseConfig().getIndex();
         String idName = datasourceDefinition.getSyncTableIDefinitions().get(0).getMapping().getKeyAlias();

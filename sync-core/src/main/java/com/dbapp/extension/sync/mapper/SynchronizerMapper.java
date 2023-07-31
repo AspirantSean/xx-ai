@@ -73,7 +73,9 @@ public interface SynchronizerMapper {
 
     int dropIncrementalView(@Param("versionViewName") String versionViewName);
 
-    List<Map<String, Object>> traverseIncrementalView(@Param("versionViewName") String versionViewName, @Param("limit") int limit);
+    List<Map<String, Object>> traverseIncrementalView(@Param("versionViewName") String versionViewName,
+                                                      @Param("limit") int limit,
+                                                      @Param("offset") int offset);
 
     List<Map<String, Object>> queryData(@Param("sql") String sql);
 

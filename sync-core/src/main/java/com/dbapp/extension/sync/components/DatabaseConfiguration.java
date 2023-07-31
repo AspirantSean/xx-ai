@@ -8,13 +8,11 @@ import com.dbapp.extension.sync.util.SystemProperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
 
 @Slf4j
-@EnableAsync
 @Configuration
 public class DatabaseConfiguration {
 

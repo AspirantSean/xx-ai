@@ -25,7 +25,7 @@
     <properties>
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
         <project.name>sync</project.name>
-        <ext.main.class>com.dbapp.extension.sync.ExtApplication</ext.main.class>
+        <ext.main.class>com.dbapp.extension.sync.SyncApplication</ext.main.class>
     </properties>
 
     <build>

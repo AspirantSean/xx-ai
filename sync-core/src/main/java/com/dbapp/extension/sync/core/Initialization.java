@@ -3,7 +3,7 @@ package com.dbapp.extension.sync.core;
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
 import com.dbapp.extension.sync.constant.Constant;
-import com.dbapp.extension.sync.core.synchronize.Synchronizer;
+import com.dbapp.extension.sync.core.synchronize.ISynchronizer;
 import com.dbapp.extension.sync.enums.SyncStatus;
 import com.dbapp.extension.sync.mapper.SynchronizerMapper;
 import com.dbapp.extension.sync.model.ao.DatabaseConfig;
@@ -40,7 +40,7 @@ public class Initialization implements ApplicationListener<ApplicationReadyEvent
     @Resource
     private SynchronizerMapper synchronizerMapper;
     @Resource
-    private Synchronizer synchronizer;
+    private ISynchronizer iSynchronizer;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -131,7 +131,7 @@ public class Initialization implements ApplicationListener<ApplicationReadyEvent
             // 1、开启全量同步；2、遍历历史同步版本号继续完成历史失败版本同步
             if ("true".equals(GlobalAttribute.getPropertyString("full.synchronize", "true"))) {
                 // 全量同步
-                UpdateVersion updateVersion = synchronizer.fullSynchronization(true);
+                UpdateVersion updateVersion = iSynchronizer.fullSynchronization(true, true);
                 // 清理所有历史失败条目
                 updateVersion = synchronizerMapper.getUpdateVersionByVersion(datasourceDefinition.getSyncVersionRecordTable(), updateVersion.getVersion());
                 if (SyncStatus.Success == updateVersion.getStatus())
@@ -141,7 +141,7 @@ public class Initialization implements ApplicationListener<ApplicationReadyEvent
                 List<UpdateVersion> unsuccessfulVersions = synchronizerMapper.getUnsuccessfulVersions(datasourceDefinition.getSyncVersionRecordTable());
                 for (UpdateVersion unsuccessfulVersion : unsuccessfulVersions) {
                     // 重新更新
-                    synchronizer.incrementalSynchronizationByVersion(unsuccessfulVersion);
+                    iSynchronizer.incrementalSynchronizationByVersion(unsuccessfulVersion);
                 }
                 UpdateVersion successUpdateVersion = synchronizerMapper.getSuccessUpdateVersion(datasourceDefinition.getSyncVersionRecordTable());
                 UpdateVersion currentUpdateVersion = UpdateVersion.builder()
@@ -149,7 +149,7 @@ public class Initialization implements ApplicationListener<ApplicationReadyEvent
                         .lastVersion(successUpdateVersion == null ? 0 : successUpdateVersion.getVersion())
                         .build();
                 // 更新最新
-                synchronizer.incrementalSynchronizationByVersion(currentUpdateVersion);
+                iSynchronizer.incrementalSynchronizationByVersion(currentUpdateVersion);
             }
         }
     }

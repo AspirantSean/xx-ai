@@ -28,10 +28,6 @@ public class UpdateVersion implements Cloneable {
      */
     private boolean force;
     /**
-     * 当次同步总条数
-     */
-    private int total;
-    /**
      * 描述
      */
     private String description;
@@ -47,6 +43,10 @@ public class UpdateVersion implements Cloneable {
      * 本次同步耗时
      */
     private Long took;
+    /**
+     * 当次同步总条数
+     */
+    private int total;
     /**
      * 同步时间
      */
