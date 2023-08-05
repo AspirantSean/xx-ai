@@ -26,6 +26,8 @@
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
         <project.name>sync</project.name>
         <ext.main.class>com.dbapp.extension.sync.SyncApplication</ext.main.class>
+<!--        <tag>V1.0-sync</tag>-->
+<!--        <release.version>0fe0d439</release.version>-->
     </properties>
 
     <build>

@@ -44,17 +44,17 @@
         <fileSet>
             <directory>../${project.name}-boot/src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
-            <excludes>
-                <exclude>meta_info.data</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>../${project.name}-boot/src/main/resources</directory>
-            <outputDirectory>conf</outputDirectory>
             <filtered>true</filtered>
             <includes>
                 <include>meta_info.data</include>
+                <include>*</include>
+                <include>mybatis/*</include>
+                <include>sync/*</include>
             </includes>
+            <excludes>
+                <exclude>*-dev.*</exclude>
+                <exclude>*/*-dev.*</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>target</directory>
