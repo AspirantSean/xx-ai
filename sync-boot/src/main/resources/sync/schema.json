@@ -275,7 +275,7 @@
         },
         "relationship": {
           "variant": "object",
-          "type": "one_to_many",
+          "type": "one_to_one",
           "foreign_key": {
             "child": [
               "asset_id"
@@ -283,7 +283,16 @@
             "parent": [
               "asset_id"
             ]
-          }
+          },
+          "conditions": [
+            {
+              "field": "create_time",
+              "value": "CURRENT_DATE",
+              "type": "Function",
+              "arithmeticOperator": ">=",
+              "logicalOperator": "AND"
+            }
+          ]
         }
       },
       {

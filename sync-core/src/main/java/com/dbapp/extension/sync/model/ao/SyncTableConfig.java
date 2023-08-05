@@ -104,81 +104,10 @@ public class SyncTableConfig {
                 .collect(Collectors.joining(", ", "SELECT ", fromTable()));
     }
 
-    private String sqlByTable(String pSql) {
-        // 查自身表
-        StringBuilder tableSql = new StringBuilder("SELECT");
-        if (parent == null) {
-            tableSql.append(" ")
-                    .append(String.join(", ", columns))
-                    .append(" FROM ")
-                    .append(getTable())
-                    .append(" WHERE ")
-                    .append(getKey())
-                    .append(" IN (${ids})");
-        } else {
-            RelationShip.ForeignKey foreignKey = getRelationShip().getForeignKey();
-            List<String> pfk = foreignKey.getParent();
-            List<String> cfk = foreignKey.getChild();
-            if (isKeyAssociationContinuous()) {
-                tableSql.append(" ")
-                        .append(String.join(", ", columns))
-                        .append(" FROM ")
-                        .append(getTable())
-                        .append(" WHERE ")
-                        .append(cfk.get(0))
-                        .append(" IN (${ids})");
-            } else {
-                String pAlias = getTable() + "_relate_" + parent.getTable();
-                tableSql.append(" ")
-                        .append(String.join(", ", columns))
-                        .append(" FROM ")
-                        .append(getTable())
-                        .append(" LEFT JOIN (")
-                        .append("SELECT ")
-                        .append(String.join(", ", pfk))
-                        .append(pSql.substring(pSql.indexOf("FROM") + 4))
-                        .append(") AS ")
-                        .append(pAlias)
-                        .append(" ON ")
-                        .append(Stream.iterate(0, index -> index + 1)
-                                .limit(pfk.size())
-                                .map(index -> pAlias + "." + pfk.get(index) + " = " + getTable() + "." + cfk.get(index))
-                                .collect(Collectors.joining(" AND ")));
-            }
-        }
-        return tableSql.toString();
-    }
-
-    @JsonIgnore
-    private boolean isKeyAssociationContinuous() {
-        if (parent == null) {
-            return true;
-        } else {
-            RelationShip.ForeignKey foreignKey = getRelationShip().getForeignKey();
-            List<String> pfk = foreignKey.getParent();
-            return pfk.size() == 1 && ((parent.parent == null && parent.getKey().equals(pfk.get(0))) || (parent.parent != null && pfk.get(0).equals(parent.getRelationShip().getForeignKey().getChild().get(0)))) && parent.isKeyAssociationContinuous();
-        }
-    }
-
-    /**
-     * todo 未完成分表查sql
-     *
-     * @param pSql
-     */
-    public void queryDataSqlByTable(String pSql) {
-        // 本表
-        String sql = sqlByTable(pSql);
-        // 子表
-        if (CollUtil.isNotEmpty(this.children)) {
-            for (SyncTableConfig child : this.children) {
-                String subSql = child.sqlByTable(sql);
-            }
-        }
-    }
-
     private String fromTable() {
         String originalTableName = getTableName();// 表名
         String alias = getAliasWithQuotation();// 别名
+        String aliasDot = alias + ".";
         // 构建表名与别名映射
         StringBuilder fromBuilder = new StringBuilder(originalTableName)
                 .append(" AS ")
@@ -189,15 +118,33 @@ public class SyncTableConfig {
             List<String> parentKeys = foreignKey.getParent();
             List<String> childKeys = foreignKey.getChild();
             String parentAliasDot = parent.getAliasWithQuotation() + ".";
-            String aliasDot = alias + ".";
             String onCondition = Stream.iterate(0, index -> index + 1)
                     .limit(parentKeys.size())
                     .map(index -> parentAliasDot + parentKeys.get(index)
                             + " = " + aliasDot + childKeys.get(index))
                     .collect(Collectors.joining(" AND ", " ON ", " "));
+            List<RelationShip.Condition> conditions = relationShip.getConditions();
+            if (CollUtil.isNotEmpty(conditions)) {
+                onCondition += conditions.stream()
+                        .map(condition -> condition.getLogicalOperator() + " " + condition.convertToString(aliasDot))
+                        .collect(Collectors.joining(" "));
+            }
             fromBuilder.insert(0, " LEFT JOIN ").append(onCondition);
         } else {
             fromBuilder.insert(0, " FROM ");
+            List<RelationShip.Condition> conditions;
+            if (relationShip != null && CollUtil.isNotEmpty(conditions = relationShip.getConditions())) {
+                fromBuilder.append(conditions.stream()
+                        .reduce(" WHERE 1 = 1",
+                                (former, later) -> former
+                                        + " "
+                                        + later.getLogicalOperator()
+                                        + " "
+                                        + later.convertToString(aliasDot),
+                                (former, later) -> former
+                                        + " "
+                                        + later));
+            }
         }
         // 拼接子表
         if (CollUtil.isNotEmpty(children)) {

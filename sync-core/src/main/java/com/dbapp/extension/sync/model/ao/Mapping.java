@@ -1,8 +1,10 @@
 package com.dbapp.extension.sync.model.ao;
 
 import cn.hutool.core.collection.CollUtil;
+import com.alibaba.fastjson.JSON;
 import com.dbapp.extension.sync.enums.RelationType;
 import lombok.Data;
+import org.postgresql.util.PGobject;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,7 +48,11 @@ public class Mapping {
                     Map<String, Object> row = rowList.get(0);
                     // 本级数据
                     for (Map.Entry<String, String> entry : map.entrySet()) {
-                        datum.put(entry.getValue(), row.get(entry.getKey()));
+                        Object value = row.get(entry.getKey());
+                        datum.put(entry.getValue(),
+                                value instanceof PGobject
+                                        ? JSON.parseObject(((PGobject) value).getValue())
+                                        : value);
                     }
                     // 子级数据
                     if (CollUtil.isNotEmpty(mappings))

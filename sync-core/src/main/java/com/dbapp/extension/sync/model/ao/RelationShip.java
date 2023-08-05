@@ -1,10 +1,12 @@
 package com.dbapp.extension.sync.model.ao;
 
-import com.dbapp.extension.sync.enums.VariantType;
 import com.dbapp.extension.sync.enums.RelationType;
+import com.dbapp.extension.sync.enums.ValueType;
+import com.dbapp.extension.sync.enums.VariantType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -29,6 +31,10 @@ public class RelationShip {
      * todo 暂未定义
      */
     private Object throughTables;
+    /**
+     * 特定连接条件
+     */
+    private List<Condition> conditions;
 
     /**
      * 子表与主表的外键关联关系
@@ -44,4 +50,34 @@ public class RelationShip {
          */
         private List<String> child;
     }
+
+    @Data
+    public static class Condition {
+        /**
+         * 字段名
+         */
+        private String field;
+        /**
+         * 字段值
+         */
+        private String value;
+        /**
+         * 字段类型
+         */
+        private ValueType type;
+        /**
+         * 算术运算符
+         */
+        private String arithmeticOperator;
+        /**
+         * 逻辑连接符
+         */
+        private String logicalOperator;
+
+        public String convertToString(String tableNameDot) {
+            return type.convertToCondition(StringUtils.isBlank(tableNameDot) ? field : tableNameDot + field, arithmeticOperator, value);
+        }
+
+    }
+
 }
