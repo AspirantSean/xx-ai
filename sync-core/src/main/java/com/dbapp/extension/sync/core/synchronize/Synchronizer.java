@@ -140,7 +140,7 @@ public class Synchronizer implements ISynchronizer {
                         log.error(message);
                         break;
                     } else {
-                        currentVersion.setDescription("重试" + tryTimes.get() + "次失败，elasticsearch批量写入报错。失败条目id：" + String.join("、", failedData) + " 等");
+                        currentVersion.setDescription("重试" + tryTimes.get() + "次失败，elasticsearch批量写入报错。失败条目id：" + String.join("、", failedData.size() > 10 ? failedData.subList(0, 10) : failedData) + " 等");
                         currentVersion.setStatus(SyncStatus.Synchronizing);
                         synchronizerMapper.updateSyncVersionRecord(datasourceDefinition.getSyncVersionRecordTable(), currentVersion);
                     }

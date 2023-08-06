@@ -179,7 +179,7 @@
             "version"      bigint      NOT NULL,
             "last_version" bigint      NOT NULL,
             "force"        bool        NOT NULL DEFAULT false,
-            "description"  varchar(500),
+            "description"  varchar(5000),
             "status"       varchar(20) NOT NULL DEFAULT 'none' check ("status" in ('New', 'Synchronizing', 'Success', 'Failed')),
             "times"        int         NOT NULL DEFAULT 1,
             "took"         bigint               DEFAULT NULL,
@@ -270,7 +270,7 @@
     </insert>
 
     <select id="traverseIncrementalView" resultType="java.util.Map" databaseId="postgres">
-        SELECT "id", "sync_type" AS syncType
+        SELECT "id", "sync_type" AS "syncType"
         FROM ${versionViewName}
         LIMIT #{limit} OFFSET #{offset}
     </select>
