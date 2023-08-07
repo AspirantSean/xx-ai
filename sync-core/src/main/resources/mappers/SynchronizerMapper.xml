@@ -285,7 +285,8 @@
         <if test="force">
             , "version" = CASE WHEN "version" > #{version} THEN "version" ELSE #{version} END
         </if>
-        WHERE "id" IN
+        WHERE "sync_type" != 'delete'
+          AND "id" IN
         <foreach collection="ids" open="(" item="id" separator="," close=")" nullable="true">
             #{id}
         </foreach>
@@ -294,8 +295,7 @@
     <update id="deleteSyncVersion" databaseId="postgres">
         DELETE
         FROM "${database}"."${schema}"."${syncPrimaryVersionTableName}"
-        WHERE "sync_type" = 'delete'
-          AND "id" IN
+        WHERE "id" IN
         <foreach collection="ids" open="(" item="id" separator="," close=")" nullable="true">
             #{id}
         </foreach>
