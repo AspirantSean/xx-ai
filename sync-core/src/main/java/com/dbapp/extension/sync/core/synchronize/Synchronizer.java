@@ -59,15 +59,15 @@ public class Synchronizer implements ISynchronizer {
      * 线程池，限制在全量同步 分批查询->同步elasticsearch 阶段，避免死锁等待
      */
     private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-            10, 100, 60, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+            10, 10, 60, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.DiscardOldestPolicy());
 
     /**
      * 主分批线程，优先于同步动作
      */
     private final ThreadPoolExecutor primaryThreadPoolExecutor = new ThreadPoolExecutor(
-            10, 100, 60, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+            10, 10, 60, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.DiscardPolicy());
 
     /**
      * 全量同步
@@ -252,7 +252,14 @@ public class Synchronizer implements ISynchronizer {
             futures.addAll(Lists.partition(deleteIds, 3000)
                     .stream()
                     .map(ArrayList::new)
-                    .map(deleteIdList -> threadPoolExecutor.submit(() -> synchronizeDeletedData(database, schema, syncTableIDefinition, deleteIdList)))
+                    .map(deleteIdList -> threadPoolExecutor.submit(() -> {
+                        try {
+                            return synchronizeDeletedData(database, schema, syncTableIDefinition, deleteIdList);
+                        } catch (Exception e) {
+                            log.error("同步删除任务执行失败", e);
+                            return null;
+                        }
+                    }))
                     .collect(Collectors.toList()));
         }
         // 待同步数据
@@ -263,37 +270,42 @@ public class Synchronizer implements ISynchronizer {
             futures.addAll(Lists.partition(syncList, 3000)
                     .stream()
                     .map(syncVersionList -> threadPoolExecutor.submit(() -> {
-                        // 同步数据的id列表
-                        List<String> originalSyncIdList = syncVersionList.stream()
-                                .map(syncDatum -> String.valueOf(syncDatum.get("id")))
-                                .collect(Collectors.toList());
-                        // 查询业务数据 数据写入es
-                        Map<String, Map<String, Object>> data = Lists.partition(originalSyncIdList, 300)
-                                .stream()
-                                .map(subSyncIdList -> queryDataByIds(syncTableIDefinition, subSyncIdList))
-                                .flatMap(Collection::stream)
-                                .collect(Collectors.toMap(datum -> (String) datum.get(idName), datum -> datum, (former, later) -> former));
-                        // 真正待同步的id
-                        Collection<String> syncIds = data.keySet();
-                        // 同步数据
-                        List<String> failedSyncIds = incrementalSynchronizationByObject(new ArrayList<>(data.values()));// 同步失败的id
-                        // 修改视图中同步成功条目数据的version
-                        if (!failedSyncIds.isEmpty()) {
-                            // 移除失败条目
-                            syncIds.removeAll(failedSyncIds);
+                        try {
+                            // 同步数据的id列表
+                            List<String> originalSyncIdList = syncVersionList.stream()
+                                    .map(syncDatum -> String.valueOf(syncDatum.get("id")))
+                                    .collect(Collectors.toList());
+                            // 查询业务数据 数据写入es
+                            Map<String, Map<String, Object>> data = Lists.partition(originalSyncIdList, 300)
+                                    .stream()
+                                    .map(subSyncIdList -> queryDataByIds(syncTableIDefinition, subSyncIdList))
+                                    .flatMap(Collection::stream)
+                                    .collect(Collectors.toMap(datum -> (String) datum.get(idName), datum -> datum, (former, later) -> former));
+                            // 真正待同步的id
+                            Collection<String> syncIds = data.keySet();
+                            // 同步数据
+                            List<String> failedSyncIds = incrementalSynchronizationByObject(new ArrayList<>(data.values()));// 同步失败的id
+                            // 修改视图中同步成功条目数据的version
+                            if (!failedSyncIds.isEmpty()) {
+                                // 移除失败条目
+                                syncIds.removeAll(failedSyncIds);
+                            }
+                            if (!syncIds.isEmpty()) {
+                                // 修改成功条目
+                                synchronizerMapper.updateSyncVersion(
+                                        database, schema, syncTableIDefinition.getVersionTableName(),
+                                        syncIds, currentVersion.getVersion(), currentVersion.isForce());
+                            }
+                            // 查询不到的id则删除
+                            originalSyncIdList.removeAll(syncIds);// 全部id减去同步id得到剩余需要删除的id
+                            List<String> failedDeleteIds = synchronizeDeletedData(database, schema, syncTableIDefinition, originalSyncIdList);
+                            // 同步失败+删除失败
+                            failedSyncIds.addAll(failedDeleteIds);
+                            return failedSyncIds;
+                        } catch (Exception e) {
+                            log.error("同步任务执行失败", e);
+                            return null;
                         }
-                        if (!syncIds.isEmpty()) {
-                            // 修改成功条目
-                            synchronizerMapper.updateSyncVersion(
-                                    database, schema, syncTableIDefinition.getVersionTableName(),
-                                    syncIds, currentVersion.getVersion(), currentVersion.isForce());
-                        }
-                        // 查询不到的id则删除
-                        originalSyncIdList.removeAll(syncIds);// 全部id减去同步id得到剩余需要删除的id
-                        List<String> failedDeleteIds = synchronizeDeletedData(database, schema, syncTableIDefinition, originalSyncIdList);
-                        // 同步失败+删除失败
-                        failedSyncIds.addAll(failedDeleteIds);
-                        return failedSyncIds;
                     }))
                     .collect(Collectors.toList()));
         }
@@ -301,7 +313,9 @@ public class Synchronizer implements ISynchronizer {
         futures.forEach(future -> {
             try {
                 // 整合失败条目
-                failedData.addAll(future.get());
+                List<String> rersult = future.get();
+                if (CollUtil.isNotEmpty(rersult))
+                    failedData.addAll(rersult);
             } catch (Exception e) {
                 log.error("同步任务执行失败，线程池调度执行异常", e);
             }
@@ -350,12 +364,19 @@ public class Synchronizer implements ISynchronizer {
             return failedData;
         }
         // 循环配置
+        String database = datasourceDefinition.getDatabaseConfig().getDatabase();
         for (SyncTableIDefinition syncTableIDefinition : datasourceDefinition.getSyncTableIDefinitions()) {
-            List<Map<String, Object>> data = new ArrayList<>();
+            String schema = syncTableIDefinition.getSyncTableConfig().getSchema();
             if (SyncType.delete == syncType) {
                 // 删除
                 failedData.addAll(deleteSynchronizeData(ids));
+                // 从版本表移除
+                if (!failedData.isEmpty()) {
+                    ids.removeAll(failedData);
+                }
+                synchronizerMapper.deleteSyncVersion(database, schema, syncTableIDefinition.getVersionTableName(), ids);
             } else {
+                List<Map<String, Object>> data = new ArrayList<>();
                 for (List<String> idList : Lists.partition(ids, 300)) {
                     // 转化数据为对象
                     data.addAll(queryDataByIds(syncTableIDefinition, idList));
@@ -368,6 +389,13 @@ public class Synchronizer implements ISynchronizer {
                     failedData.addAll(incrementalSynchronizationByObject(data));
                     data.clear();
                 }
+                // 修改版本表数据
+                if (!failedData.isEmpty()) {
+                    ids.removeAll(failedData);
+                }
+                synchronizerMapper.updateSyncVersion(
+                        database, schema, syncTableIDefinition.getVersionTableName(),
+                        ids, 0, false);
             }
         }
         return failedData;
@@ -411,7 +439,7 @@ public class Synchronizer implements ISynchronizer {
         String index = datasourceDefinition.getDatabaseConfig().getIndex();
         String idName = datasourceDefinition.getSyncTableIDefinitions().get(0).getMapping().getKeyAlias();
         List<String> failedData = new ArrayList<>();
-        for (List<Map<String, Object>> partData : Lists.partition(data, 3000)) {
+        for (List<Map<String, Object>> partData : Lists.partition(data, 2000)) {
             try {
                 BulkResponse bulkResponse = iEsService.bulk(new BulkRequest()
                         .add(partData.stream()

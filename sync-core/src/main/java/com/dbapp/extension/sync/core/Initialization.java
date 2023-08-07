@@ -152,7 +152,7 @@ public class Initialization implements ApplicationListener<ApplicationReadyEvent
     private void syncJob() {
         long period = GlobalAttribute.getPropertyLong("sync_schedule_period", 10);
         // 设定定时任务
-        if ("rate".equals(GlobalAttribute.getPropertyString("sync_schedule_fixed_type", "rate"))) {
+        if ("rate".equals(GlobalAttribute.getPropertyString("sync_schedule_fixed_type", "delay"))) {
             SCHEDULED_EXECUTOR_SERVICE.scheduleAtFixedRate(this::incrementalSync, period, period, TimeUnit.MINUTES);
         } else {
             SCHEDULED_EXECUTOR_SERVICE.scheduleWithFixedDelay(this::incrementalSync, period, period, TimeUnit.MINUTES);

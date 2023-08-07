@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ public class SynchronizeServiceImpl implements ISynchronizeService {
     @Override
     public ApiResponse<?> incrementalSynchronizationById(SyncType syncType, List<String> ids) {
         try {
+            log.info("synchronizing:: time: {}, request for {} data", new Date(), syncType);
             DataResponse<List<String>> response = ApiResponse.success(iSynchronizer.incrementalSynchronizationById(syncType, ids))
                     .prop("message", "同步结束")
                     .prop("info", "结果集为失败的id集合")
