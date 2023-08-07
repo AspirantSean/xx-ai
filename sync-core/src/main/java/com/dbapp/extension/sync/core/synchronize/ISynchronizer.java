@@ -19,4 +19,6 @@ public interface ISynchronizer {
     List<String> deleteSynchronizeData(List<String> ids);
 
     List<String> incrementalSynchronizationByObject(List<Map<String, Object>> data);
+
+    boolean refreshIndex();
 }

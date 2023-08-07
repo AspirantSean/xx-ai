@@ -1,6 +1,8 @@
 package com.dbapp.extension.sync.prototype.es;
 
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -23,4 +25,6 @@ public interface IEsService {
     BulkResponse bulk(BulkRequest bulkRequest) throws IOException;
 
     Cancellable bulkAsync(BulkRequest bulkRequest, ActionListener<BulkResponse> listener);
+
+    RefreshResponse refreshIndex(RefreshRequest refreshRequest) throws IOException;
 }

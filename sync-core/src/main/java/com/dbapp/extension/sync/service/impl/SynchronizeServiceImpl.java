@@ -2,8 +2,10 @@ package com.dbapp.extension.sync.service.impl;
 
 import com.dbapp.extension.sync.core.synchronize.ISynchronizer;
 import com.dbapp.extension.sync.enums.SyncType;
+import com.dbapp.extension.sync.model.dto.UpdateVersion;
 import com.dbapp.extension.sync.restful.entity.ErrorCode;
 import com.dbapp.extension.sync.restful.response.ApiResponse;
+import com.dbapp.extension.sync.restful.response.DataResponse;
 import com.dbapp.extension.sync.service.ISynchronizeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,8 +25,10 @@ public class SynchronizeServiceImpl implements ISynchronizeService {
     @Override
     public ApiResponse<?> fullSynchronization(boolean force) {
         try {
-            return ApiResponse.success(iSynchronizer.fullSynchronization(false, force))
+            DataResponse<UpdateVersion> response = ApiResponse.success(iSynchronizer.fullSynchronization(false, force))
                     .build();
+            iSynchronizer.refreshIndex();
+            return response;
         } catch (Exception e) {
             log.error("数据同步异常", e);
             return ErrorCode.InternalErrors
@@ -42,10 +46,12 @@ public class SynchronizeServiceImpl implements ISynchronizeService {
     @Override
     public ApiResponse<?> incrementalSynchronizationById(SyncType syncType, List<String> ids) {
         try {
-            return ApiResponse.success(iSynchronizer.incrementalSynchronizationById(syncType, ids))
+            DataResponse<List<String>> response = ApiResponse.success(iSynchronizer.incrementalSynchronizationById(syncType, ids))
                     .prop("message", "同步结束")
                     .prop("info", "结果集为失败的id集合")
                     .build();
+            iSynchronizer.refreshIndex();
+            return response;
         } catch (Exception e) {
             log.error("数据同步异常", e);
             return ErrorCode.InternalErrors
@@ -63,10 +69,12 @@ public class SynchronizeServiceImpl implements ISynchronizeService {
     @Override
     public ApiResponse<?> incrementalSynchronizationByObject(List<Map<String, Object>> data) {
         try {
-            return ApiResponse.success(iSynchronizer.incrementalSynchronizationByObject(data))
+            DataResponse<List<String>> response = ApiResponse.success(iSynchronizer.incrementalSynchronizationByObject(data))
                     .prop("message", "同步结束")
                     .prop("info", "结果集为失败的id集合")
                     .build();
+            iSynchronizer.refreshIndex();
+            return response;
         } catch (Exception e) {
             log.error("数据同步异常", e);
             return ErrorCode.InternalErrors

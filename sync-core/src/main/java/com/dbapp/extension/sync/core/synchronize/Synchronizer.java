@@ -16,6 +16,8 @@ import com.dbapp.extension.sync.util.GlobalAttribute;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -250,49 +252,47 @@ public class Synchronizer implements ISynchronizer {
             futures.addAll(Lists.partition(deleteIds, 3000)
                     .stream()
                     .map(ArrayList::new)
-                    .map(deleteIdList -> threadPoolExecutor.submit(() -> {
-                        List<String> failedDeleteIds = deleteSynchronizeData(deleteIdList);
-                        // 修改视图中删除成功条目数据的version
-                        if (!failedDeleteIds.isEmpty()) {
-                            // 移除失败条目
-                            deleteIdList.removeAll(failedDeleteIds);
-                        }
-                        if (!deleteIdList.isEmpty()) {
-                            // 修改成功条目
-                            synchronizerMapper.deleteSyncVersion(database, schema, syncTableIDefinition.getVersionTableName(), deleteIdList);
-                        }
-                        return failedDeleteIds;
-                    }))
+                    .map(deleteIdList -> threadPoolExecutor.submit(() -> synchronizeDeletedData(database, schema, syncTableIDefinition, deleteIdList)))
                     .collect(Collectors.toList()));
         }
         // 待同步数据
         List<Map<String, Object>> syncList = syncDataMap.get(Boolean.FALSE);
         if (!syncList.isEmpty()) {
+            String idName = syncTableIDefinition.getMapping().getKeyAlias();
             // 切分成3000一个线程进行同步
             futures.addAll(Lists.partition(syncList, 3000)
                     .stream()
                     .map(syncVersionList -> threadPoolExecutor.submit(() -> {
                         // 同步数据的id列表
-                        List<String> syncIdList = syncVersionList.stream()
+                        List<String> originalSyncIdList = syncVersionList.stream()
                                 .map(syncDatum -> String.valueOf(syncDatum.get("id")))
                                 .collect(Collectors.toList());
                         // 查询业务数据 数据写入es
-                        List<String> failedSyncIds = incrementalSynchronizationByObject(Lists.partition(syncIdList, 300)
+                        Map<String, Map<String, Object>> data = Lists.partition(originalSyncIdList, 300)
                                 .stream()
                                 .map(subSyncIdList -> queryDataByIds(syncTableIDefinition, subSyncIdList))
                                 .flatMap(Collection::stream)
-                                .collect(Collectors.toList()));
+                                .collect(Collectors.toMap(datum -> (String) datum.get(idName), datum -> datum, (former, later) -> former));
+                        // 真正待同步的id
+                        Collection<String> syncIds = data.keySet();
+                        // 同步数据
+                        List<String> failedSyncIds = incrementalSynchronizationByObject(new ArrayList<>(data.values()));// 同步失败的id
                         // 修改视图中同步成功条目数据的version
                         if (!failedSyncIds.isEmpty()) {
                             // 移除失败条目
-                            syncIdList.removeAll(failedSyncIds);
+                            syncIds.removeAll(failedSyncIds);
                         }
-                        if (!syncIdList.isEmpty()) {
+                        if (!syncIds.isEmpty()) {
                             // 修改成功条目
                             synchronizerMapper.updateSyncVersion(
                                     database, schema, syncTableIDefinition.getVersionTableName(),
-                                    syncIdList, currentVersion.getVersion(), currentVersion.isForce());
+                                    syncIds, currentVersion.getVersion(), currentVersion.isForce());
                         }
+                        // 查询不到的id则删除
+                        originalSyncIdList.removeAll(syncIds);// 全部id减去同步id得到剩余需要删除的id
+                        List<String> failedDeleteIds = synchronizeDeletedData(database, schema, syncTableIDefinition, originalSyncIdList);
+                        // 同步失败+删除失败
+                        failedSyncIds.addAll(failedDeleteIds);
                         return failedSyncIds;
                     }))
                     .collect(Collectors.toList()));
@@ -307,6 +307,23 @@ public class Synchronizer implements ISynchronizer {
             }
         });
         return failedData;
+    }
+
+    private List<String> synchronizeDeletedData(String database,
+                                                String schema,
+                                                SyncTableIDefinition syncTableIDefinition,
+                                                List<String> deleteIdList) {
+        List<String> failedDeleteIds = deleteSynchronizeData(deleteIdList);// 删除失败的id
+        // 修改视图中删除成功条目数据的version
+        if (!failedDeleteIds.isEmpty()) {
+            // 移除失败条目
+            deleteIdList.removeAll(failedDeleteIds);
+        }
+        if (!deleteIdList.isEmpty()) {
+            // 修改成功条目
+            synchronizerMapper.deleteSyncVersion(database, schema, syncTableIDefinition.getVersionTableName(), deleteIdList);
+        }
+        return failedDeleteIds;
     }
 
     private List<Map<String, Object>> queryDataByIds(SyncTableIDefinition syncTableIDefinition, List<String> ids) {
@@ -416,6 +433,17 @@ public class Synchronizer implements ISynchronizer {
             }
         }
         return failedData;
+    }
+
+    @Override
+    public boolean refreshIndex() {
+        try {
+            RefreshResponse response = iEsService.refreshIndex(new RefreshRequest(datasourceDefinition.getDatabaseConfig().getIndex()));
+            return response.getTotalShards() > 0;
+        } catch (IOException e) {
+            log.error("refresh ES index failed!", e);
+            return false;
+        }
     }
 
     @Slf4j

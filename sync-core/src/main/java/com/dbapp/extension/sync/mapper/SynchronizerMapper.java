@@ -4,6 +4,7 @@ import com.dbapp.extension.sync.model.dto.UpdateVersion;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +83,7 @@ public interface SynchronizerMapper {
     int updateSyncVersion(@Param("database") String database,
                           @Param("schema") String schema,
                           @Param("syncPrimaryVersionTableName") String syncPrimaryVersionTableName,
-                          @Param("ids") List<String> ids,
+                          @Param("ids") Collection<String> ids,
                           @Param("version") long version,
                           @Param("force") boolean force);
 

@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -16,10 +15,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  **/
 @Slf4j
 @EnableAsync
-@EnableScheduling
 @EnableTransactionManagement
 @EnableAspectJAutoProxy(exposeProxy = true)
-@SpringBootApplication(scanBasePackages = {"com.dbapp.*"})
+@SpringBootApplication
 public class SyncApplication {
     public static void main(String[] args) {
         try {

@@ -3,6 +3,8 @@ package com.dbapp.extension.sync.prototype.es.impl;
 import com.dbapp.extension.sync.prototype.es.IEsService;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -57,6 +59,11 @@ public final class EsServiceImpl implements IEsService {
     public Cancellable bulkAsync(BulkRequest bulkRequest, ActionListener<BulkResponse> listener) {
         log.info("elasticsearch: bulk request is " + bulkRequest.requests());
         return highLevelClient.bulkAsync(bulkRequest, RequestOptions.DEFAULT, listener);
+    }
+
+    @Override
+    public RefreshResponse refreshIndex(RefreshRequest refreshRequest) throws IOException {
+        return highLevelClient.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
     }
 
 }

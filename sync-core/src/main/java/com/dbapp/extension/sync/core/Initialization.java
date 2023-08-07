@@ -27,6 +27,9 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -137,20 +140,38 @@ public class Initialization implements ApplicationListener<ApplicationReadyEvent
                 if (SyncStatus.Success == updateVersion.getStatus())
                     synchronizerMapper.updateUnsuccessfulVersions(datasourceDefinition.getSyncVersionRecordTable());
             } else {
-                // 查询是否需要更新：1、历史更新未成功的；2、最新时间范围内需更新的
-                List<UpdateVersion> unsuccessfulVersions = synchronizerMapper.getUnsuccessfulVersions(datasourceDefinition.getSyncVersionRecordTable());
-                for (UpdateVersion unsuccessfulVersion : unsuccessfulVersions) {
-                    // 重新更新
-                    iSynchronizer.incrementalSynchronizationByVersion(unsuccessfulVersion);
-                }
-                UpdateVersion successUpdateVersion = synchronizerMapper.getSuccessUpdateVersion(datasourceDefinition.getSyncVersionRecordTable());
-                UpdateVersion currentUpdateVersion = UpdateVersion.builder()
-                        .version(System.currentTimeMillis())
-                        .lastVersion(successUpdateVersion == null ? 0 : successUpdateVersion.getVersion())
-                        .build();
-                // 更新最新
-                iSynchronizer.incrementalSynchronizationByVersion(currentUpdateVersion);
+                this.incrementalSync();
             }
+            // 启动定时任务
+            syncJob();
         }
+    }
+
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(3);
+
+    private void syncJob() {
+        long period = GlobalAttribute.getPropertyLong("sync_schedule_period", 10);
+        // 设定定时任务
+        if ("rate".equals(GlobalAttribute.getPropertyString("sync_schedule_fixed_type", "rate"))) {
+            SCHEDULED_EXECUTOR_SERVICE.scheduleAtFixedRate(this::incrementalSync, period, period, TimeUnit.MINUTES);
+        } else {
+            SCHEDULED_EXECUTOR_SERVICE.scheduleWithFixedDelay(this::incrementalSync, period, period, TimeUnit.MINUTES);
+        }
+    }
+
+    private void incrementalSync() {
+        // 查询是否需要更新：1、历史更新未成功的；2、最新时间范围内需更新的
+        List<UpdateVersion> unsuccessfulVersions = synchronizerMapper.getUnsuccessfulVersions(datasourceDefinition.getSyncVersionRecordTable());
+        for (UpdateVersion unsuccessfulVersion : unsuccessfulVersions) {
+            // 重新更新
+            iSynchronizer.incrementalSynchronizationByVersion(unsuccessfulVersion);
+        }
+        UpdateVersion successUpdateVersion = synchronizerMapper.getSuccessUpdateVersion(datasourceDefinition.getSyncVersionRecordTable());
+        UpdateVersion currentUpdateVersion = UpdateVersion.builder()
+                .version(System.currentTimeMillis())
+                .lastVersion(successUpdateVersion == null ? 0 : successUpdateVersion.getVersion())
+                .build();
+        // 更新最新
+        iSynchronizer.incrementalSynchronizationByVersion(currentUpdateVersion);
     }
 }

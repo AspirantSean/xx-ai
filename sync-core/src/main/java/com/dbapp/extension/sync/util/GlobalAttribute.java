@@ -1,7 +1,6 @@
 package com.dbapp.extension.sync.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -52,6 +51,18 @@ public final class GlobalAttribute {
     public static int getPropertyInteger(String key, int defaultVal) {
         String val = Objects.toString(globalProperties.getProperty(key), Integer.toString(defaultVal));
         return Integer.parseInt(val);
+    }
+
+    /**
+     * 获取kye的配置内容，并转为long
+     *
+     * @param key        键
+     * @param defaultVal 缺省值
+     * @return 值
+     */
+    public static long getPropertyLong(String key, long defaultVal) {
+        String val = Objects.toString(globalProperties.getProperty(key), Long.toString(defaultVal));
+        return Long.parseLong(val);
     }
 
     /**
