@@ -1,21 +1,19 @@
 package com.dbapp.extension.ai.management;
 
-import com.dbapp.extension.ai.job.AIModelAnalysisJob;
-import com.dbapp.extension.ai.job.PollingAIModelJob;
+import cn.hutool.core.collection.CollUtil;
 import com.dbapp.extension.ai.management.runtime.process.AIModelProcess;
 import com.dbapp.extension.ai.mapper.AIAnomalyAnalysisMapper;
-import com.dbapp.extension.ai.quartz.IQuartzManager;
 import com.dbapp.extension.ai.utils.GlobalAttribute;
+import com.dbapp.extension.job.entity.JobInfo;
+import com.dbapp.extension.job.service.XxlJobService;
 import com.dbapp.extension.mirror.dto.AIModel;
-import com.google.common.collect.ImmutableMap;
+import com.dbapp.job.core.enums.EditTypeEnum;
+import com.dbapp.job.core.enums.ScheduleTypeEnum;
+import com.dbapp.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.DateBuilder;
-import org.quartz.TriggerKey;
-import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -26,52 +24,53 @@ import java.util.stream.Collectors;
 @Component
 public final class AIModelManager {
 
-    private static final String POLLING_JOB_NAME = "polling.job.name";
-    private static final String POLLING_JOB_GROUP_NAME = "polling.job.group.name";
-    private static final String POLLING_TRIGGER_NAME = "polling.trigger.name";
-    private static final String POLLING_TRIGGER_GROUP_NAME = "polling.trigger.group.name";
-
     @Resource
-    private IQuartzManager modelQuartz;
+    private XxlJobService xxlJobService;
     @Resource
     private AIAnomalyAnalysisMapper aiAnomalyAnalysisMapper;
+
+    private final Map<String, Object> configCache = new ConcurrentHashMap<>();
 
     /**
      * 初始化任务
      * 定时调整轮询AI模型的时间间隔
      */
-    @PostConstruct
-    private void initializeTask() {
-        new Timer().schedule(new TimerTask() {
-            private final Map<String, Object> cache = new ConcurrentHashMap<>();
-
-            @Override
-            public void run() {
-                int interval = GlobalAttribute.getPropertyInteger("ai.model.polling.interval", 10);
-                String intervalUnit = GlobalAttribute.getPropertyString("ai.model.polling.unit", "MINUTE");
-                if (Objects.equals(interval, cache.get("interval"))
-                        && Objects.equals(intervalUnit, cache.get("intervalUnit"))) {// 若未修改则不变
-                    return;
-                } else {// 若修改则更新缓存配置
-                    cache.put("interval", interval);
-                    cache.put("intervalUnit", intervalUnit);
-                }
-                if (!modelQuartz.listTriggers(GroupMatcher.groupContains("polling.trigger")).isEmpty()) {// 若已经存在任务则移除
-                    modelQuartz.removeJob(POLLING_JOB_NAME, POLLING_JOB_GROUP_NAME, POLLING_TRIGGER_NAME, POLLING_TRIGGER_GROUP_NAME);
-                }
-                modelQuartz.addJob(
-                        POLLING_JOB_NAME, POLLING_JOB_GROUP_NAME, POLLING_TRIGGER_NAME, POLLING_TRIGGER_GROUP_NAME,
-                        PollingAIModelJob.class,
-                        interval,
-                        DateBuilder.IntervalUnit.valueOf(intervalUnit));
-            }
-        }, 5000, 10000);// 每10秒检测一次时间间隔配置是否修改
+    @XxlJob(value = "ai-server-polling-job-config-updater",
+            name = "ai服务配置更新任务",
+            desc = "ai服务模型拉取时间间隔配置的更新任务",
+            scheduleType = ScheduleTypeEnum.FIX_RATE,
+            scheduleConf = "10",
+            editType = EditTypeEnum.NONE,
+            hide = true)
+    public void initializeJob() {
+        int interval = GlobalAttribute.getPropertyInteger("ai.model.polling.interval", 10);
+        String intervalUnit = GlobalAttribute.getPropertyString("ai.model.polling.unit", "MINUTE");
+        if (Objects.equals(interval, configCache.get("interval"))
+                && Objects.equals(intervalUnit, configCache.get("intervalUnit"))) {// 若未修改则不变
+            return;
+        } else {// 若修改则更新缓存配置
+            configCache.put("interval", interval);
+            configCache.put("intervalUnit", intervalUnit);
+        }
+        xxlJobService.deleteByOtherKey("ai-server-polling-job");
+        JobInfo jobInfo = new JobInfo();
+        jobInfo.setName("ai服务定时拉取模型任务");
+        jobInfo.setHandler("ai-server-polling-job");
+        jobInfo.setDesc("ai服务定时拉取模型，并更新现有ai模型任务");
+        jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE);
+        jobInfo.setScheduleConf(IntervalUnit.valueOf(intervalUnit).translateToSecond(interval) + "");
+        jobInfo.setTriggerStatus(true);
+        jobInfo.setEditType(EditTypeEnum.NONE);
+        jobInfo.setManual(true);
+        jobInfo.setOtherKey("ai-server-polling-job");
+        xxlJobService.addJob(jobInfo);
     }
 
     /**
      * 当前运行中的模型
      */
     private final Map<String, AIModelProcess> runtimeAiModelProcessCache = new ConcurrentHashMap<>();
+
     /**
      * 无需更改的运行中模型
      */
@@ -109,6 +108,10 @@ public final class AIModelManager {
         return true;
     }
 
+    public synchronized AIModelProcess getRunningAiModelProcess(String jobKey) {
+        return runtimeAiModelProcessCache.get(jobKey);
+    }
+
     /**
      * 调整任务调度
      */
@@ -116,20 +119,22 @@ public final class AIModelManager {
         log.info("轮询AI模型任务：开始调整AI模型任务...");
         adjustCache();
         // 移除任务
+        // 先查到所有任务
+        final Map<String, JobInfo> jobInfoList = Optional.ofNullable(xxlJobService.getJobsByHandler("ai-server-executor-job"))
+                .filter(CollUtil::isNotEmpty)
+                .orElseGet(ArrayList::new)
+                .stream()
+                .collect(Collectors.toMap(JobInfo::getOtherKey, jobInfo -> jobInfo));
         this.removeRuntimeAiModelProcessCache.forEach((ruleId, aiModelProcess) -> {
             aiModelProcess.destroy();
-            modelQuartz.removeJob(aiModelProcess.getJobName(), aiModelProcess.getJobGroupName(),
-                    aiModelProcess.getTriggerName(), aiModelProcess.getTriggerGroupName());
+            JobInfo jobInfo = jobInfoList.get(aiModelProcess.getJobKey());
+            xxlJobService.deleteByOtherKey(jobInfo.getOtherKey());
         });
         if (!this.removeRuntimeAiModelProcessCache.isEmpty()) {
             log.info("轮询AI模型任务：移除AI模型任务-{}", String.join(",", this.removeRuntimeAiModelProcessCache.keySet()));
         }
         // 添加任务
-        this.newAiModelProcessCache.forEach(
-                (aiId, aiModelProcess) -> modelQuartz.addJob(aiModelProcess.getJobName(), aiModelProcess.getJobGroupName(),
-                        aiModelProcess.getTriggerName(), aiModelProcess.getTriggerGroupName(),
-                        AIModelAnalysisJob.class, aiModelProcess.getInterval(), aiModelProcess.getIntervalUnit(),
-                        ImmutableMap.of("aiModelProcess", aiModelProcess)));
+        this.newAiModelProcessCache.forEach((aiId, aiModelProcess) -> addAiModelJob(aiModelProcess));
         if (!this.newAiModelProcessCache.isEmpty()) {
             log.info("轮询AI模型任务：新增AI模型任务-{}", String.join(",", this.newAiModelProcessCache.keySet()));
         }
@@ -144,36 +149,6 @@ public final class AIModelManager {
         this.removeRuntimeAiModelProcessCache.clear();
         this.newAiModelProcessCache.clear();
         log.info("轮询AI模型任务：调整AI模型任务完成");
-    }
-
-    /**
-     * 校验运行中的任务调度与缓存管理中的是否一致
-     */
-    private synchronized void validateExistAIJob() {
-        log.info("轮询AI模型任务：校验运行中的任务调度与缓存管理中的是否一致");
-        Set<TriggerKey> triggerKeys = modelQuartz.listTriggers(GroupMatcher.groupContains("AI"));
-        Set<String> triggerNames = triggerKeys.stream()
-                .map(triggerKey -> {
-                    if (this.runtimeAiModelProcessCache.containsKey(triggerKey.getName())) {
-                        return triggerKey.getName();
-                    }
-                    // 清楚不包含在可运行的模型中的已有任务调度
-                    this.modelQuartz.removeJob(triggerKey.getName(), triggerKey.getGroup(), triggerKey.getName(), triggerKey.getGroup());
-                    return null;
-                })
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toSet());
-        List<AIModelProcess> unStartJobList = new ArrayList<>();
-        this.runtimeAiModelProcessCache.forEach((ruleId, aiModelProcess) -> {
-            if (!triggerNames.contains(aiModelProcess.getTriggerName())) {
-                unStartJobList.add(aiModelProcess);
-            }
-        });
-        unStartJobList.forEach(aiModelProcess ->
-                this.modelQuartz.addJob(aiModelProcess.getJobName(), aiModelProcess.getJobGroupName(),
-                        aiModelProcess.getTriggerName(), aiModelProcess.getTriggerGroupName(),
-                        AIModelAnalysisJob.class, aiModelProcess.getInterval(), aiModelProcess.getIntervalUnit(),
-                        ImmutableMap.of("aiModelProcess", aiModelProcess)));
     }
 
     /**
@@ -201,6 +176,48 @@ public final class AIModelManager {
     }
 
     /**
+     * 校验运行中的任务调度与缓存管理中的是否一致
+     */
+    private synchronized void validateExistAIJob() {
+        log.info("轮询AI模型任务：校验运行中的任务调度与缓存管理中的是否一致");
+        // 先查到所有任务
+        List<String> runningJobs = Optional.ofNullable(xxlJobService.getJobsByHandler("ai-server-executor-job"))
+                .filter(CollUtil::isNotEmpty)
+                .orElseGet(ArrayList::new)
+                .stream()
+                .map(jobInfo -> {
+                    if (this.runtimeAiModelProcessCache.containsKey(jobInfo.getOtherKey())) {
+                        return jobInfo.getOtherKey();
+                    }
+                    // 清楚不包含在可运行的模型中的已有任务调度
+                    xxlJobService.deleteByOtherKey(jobInfo.getOtherKey());
+                    return null;
+                })
+                .collect(Collectors.toList());
+        for (Map.Entry<String, AIModelProcess> entry : this.runtimeAiModelProcessCache.entrySet()) {
+            if (!runningJobs.contains(entry.getKey())) {// 未启动
+                AIModelProcess aiModelProcess = entry.getValue();
+                addAiModelJob(aiModelProcess);
+            }
+        }
+    }
+
+    private void addAiModelJob(AIModelProcess aiModelProcess) {
+        JobInfo jobInfo = new JobInfo();
+        jobInfo.setName("ai服务模型定时任务");
+        jobInfo.setHandler("ai-server-executor-job");
+        jobInfo.setDesc("ai服务定时执行ai模型");
+        jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE);
+        jobInfo.setScheduleConf(aiModelProcess.getIntervalUnit().translateToSecond(aiModelProcess.getInterval()) + "");
+        jobInfo.setTriggerStatus(true);
+        jobInfo.setEditType(EditTypeEnum.NONE);
+        jobInfo.setManual(true);
+        jobInfo.setOtherKey(aiModelProcess.getJobKey());
+        jobInfo.setExecutorParam(aiModelProcess.getJobKey());
+        xxlJobService.addJob(jobInfo);
+    }
+
+    /**
      * 销毁所有AI模型进程
      */
     public synchronized void destroyAll() {
@@ -212,6 +229,26 @@ public final class AIModelManager {
         }
         if (!this.removeRuntimeAiModelProcessCache.isEmpty()) {
             this.removeRuntimeAiModelProcessCache.values().forEach(AIModelProcess::destroy);
+        }
+    }
+
+    public enum IntervalUnit {
+        SECOND(1),
+        MINUTE(60),
+        HOUR(60 * 60),
+        DAY(24 * 60 * 60),
+        WEEK(7 * 24 * 60 * 60),
+        MONTH(30 * 24 * 60 * 60),
+        YEAR(365 * 24 * 60 * 60);
+
+        private final int unit;
+
+        private IntervalUnit(int unit) {
+            this.unit = unit;
+        }
+
+        public long translateToSecond(long interval) {
+            return unit * interval;
         }
     }
 

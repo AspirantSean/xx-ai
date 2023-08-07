@@ -3,29 +3,35 @@ package com.dbapp.extension.ai.job;
 import com.dbapp.extension.ai.api.service.IBigdataService;
 import com.dbapp.extension.ai.management.AIModelManager;
 import com.dbapp.extension.mirror.dto.AIModel;
+import com.dbapp.job.core.enums.EditTypeEnum;
+import com.dbapp.job.core.enums.ScheduleTypeEnum;
+import com.dbapp.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@DisallowConcurrentExecution
-public class PollingAIModelJob implements Job {
+@Component
+public class PollingAIModelJob {
 
     @Resource
     private IBigdataService iBigdataService;
     @Resource
     private AIModelManager aiModelProcessCache;
 
-    @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    @XxlJob(value = "ai-server-polling-job",
+            name = "ai服务定时拉取模型任务",
+            desc = "ai服务定时拉取模型，并更新现有ai模型任务",
+            scheduleType = ScheduleTypeEnum.FIX_RATE,
+            scheduleConf = "600",
+            editType = EditTypeEnum.NONE,
+            otherKey = "ai-server-polling-job",
+            autoRegistry = false)
+    public void execute() {
         try {
-
             List<AIModel> aiModels = iBigdataService.getAIModelList()
                     .parallelStream()
                     .filter(AIModel::isEvent)

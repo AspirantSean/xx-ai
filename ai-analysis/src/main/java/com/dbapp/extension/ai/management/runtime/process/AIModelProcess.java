@@ -1,5 +1,6 @@
 package com.dbapp.extension.ai.management.runtime.process;
 
+import com.dbapp.extension.ai.management.AIModelManager;
 import com.dbapp.extension.ai.utils.SystemProperUtil;
 import com.dbapp.extension.mirror.dto.AIModel;
 import com.sun.jna.Library;
@@ -10,7 +11,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.DateBuilder;
 
 import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
@@ -149,6 +149,15 @@ public class AIModelProcess {
     }
 
     /**
+     * 任务主键
+     *
+     * @return
+     */
+    public String getJobKey() {
+        return this.aiModel.getRuleId();
+    }
+
+    /**
      * 触发器名
      *
      * @return
@@ -180,21 +189,18 @@ public class AIModelProcess {
      *
      * @return
      */
-    public DateBuilder.IntervalUnit getIntervalUnit() {
+    public AIModelManager.IntervalUnit getIntervalUnit() {
         String timeUnit = this.aiModel.getDetectionParams().getTimeUnit();
-        DateBuilder.IntervalUnit intervalUnit;
+        AIModelManager.IntervalUnit intervalUnit;
         switch (timeUnit) {
-            case "min":
-                intervalUnit = DateBuilder.IntervalUnit.MINUTE;
-                break;
             case "hour":
-                intervalUnit = DateBuilder.IntervalUnit.HOUR;
+                intervalUnit = AIModelManager.IntervalUnit.HOUR;
                 break;
             case "second":
-                intervalUnit = DateBuilder.IntervalUnit.SECOND;
+                intervalUnit = AIModelManager.IntervalUnit.SECOND;
                 break;
             default:
-                intervalUnit = DateBuilder.IntervalUnit.MINUTE;
+                intervalUnit = AIModelManager.IntervalUnit.MINUTE;
                 break;
         }
         return intervalUnit;
