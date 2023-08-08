@@ -59,14 +59,14 @@ public class Synchronizer implements ISynchronizer {
      * 线程池，限制在全量同步 分批查询->同步elasticsearch 阶段，避免死锁等待
      */
     private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-            10, 10, 60, TimeUnit.SECONDS,
+            10, 50, 60, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.DiscardOldestPolicy());
 
     /**
      * 主分批线程，优先于同步动作
      */
     private final ThreadPoolExecutor primaryThreadPoolExecutor = new ThreadPoolExecutor(
-            10, 10, 60, TimeUnit.SECONDS,
+            10, 50, 60, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.DiscardPolicy());
 
     /**
@@ -82,10 +82,12 @@ public class Synchronizer implements ISynchronizer {
                 .status(SyncStatus.New)
                 .description("开始全量同步任务，请勿重复执行！")
                 .build();
+        Future<UpdateVersion> versionFuture = iSynchronizer.doFullSynchronization(currentVersion);
         if (wait) {
             try {
-                return iSynchronizer.doFullSynchronization(currentVersion).get();
+                return versionFuture.get();
             } catch (Exception e) {
+                log.error("等待任务直接结束异常", e);
                 return currentVersion.clone();
             }
         } else {
@@ -313,9 +315,9 @@ public class Synchronizer implements ISynchronizer {
         futures.forEach(future -> {
             try {
                 // 整合失败条目
-                List<String> rersult = future.get();
-                if (CollUtil.isNotEmpty(rersult))
-                    failedData.addAll(rersult);
+                List<String> result = future.get();
+                if (CollUtil.isNotEmpty(result))
+                    failedData.addAll(result);
             } catch (Exception e) {
                 log.error("同步任务执行失败，线程池调度执行异常", e);
             }

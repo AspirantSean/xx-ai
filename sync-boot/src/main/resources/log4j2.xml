@@ -22,10 +22,17 @@
             <SizeBasedTriggeringPolicy size="64MB" />
             <DefaultRolloverStrategy max="20"/>
         </RollingFile>
+
+        <RollingFile name="ConsoleLog" fileName="${log.path}/console.log" filePattern="${log.path}/console.%i.log">
+            <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1.} - %msg%n}{STYLE=Logback}"/>
+            <SizeBasedTriggeringPolicy size="64MB"/>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="info">
             <appender-ref ref="Console" />
+            <appender-ref ref="ConsoleLog" />
             <appender-ref ref="RollingFile" />
             <appender-ref ref="errorLog" />
         </Root>

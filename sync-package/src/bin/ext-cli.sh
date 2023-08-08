@@ -19,13 +19,13 @@ setting_java_env() {
     export PATH=/bin:$PATH
 
     #set jvm setting for heap size
-    JAVA_OPTS="-Xms1G -Xmx1G -Xss1m -Djava.awt.headless=true "
+    JAVA_OPTS="-Xms1G -Xmx2G -Xss1m -XX:MaxPermSize=256m -Djava.awt.headless=true "
 
     #set jvm setting: enable script(restart) when OOM
     #JAVA_OPTS="$JAVA_OPTS -XX:OnOutOfMemoryError=\"$PROFILE_HOME/bin/oom.sh\" "
 
     #set jvm setting: enable heap dump when OOM
-    #JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data"
+    JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data/tmp/sync"
 
     #set jvm setting: compress ordinary object pointer, disable by default
     JAVA_OPTS="$JAVA_OPTS -XX:+UseCompressedOops "
@@ -35,7 +35,7 @@ setting_java_env() {
 
     JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir=/var/tmp"
 
-    # TODO make sure java version is 1.6 or above
+    # TODO make sure java version is 1.8 or above
 }
 
 #Extension环境变量配置方法
@@ -82,7 +82,7 @@ start() {
     pre_start
 
     #启动程序
-    java $JAVA_OPTS $main_class 1>$EXT_HOME/logs/console.log 2>&1 &
+    java $JAVA_OPTS $main_class &
     pid=$!
     echo $pid > /var/run/web.pid
 

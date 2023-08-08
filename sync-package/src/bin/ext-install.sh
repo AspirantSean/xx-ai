@@ -152,13 +152,6 @@ else
 fi
 log "复制/conf目录完成"
 
-log "开始复制/web目录"
-rm -rf $ext_home/web
-if [ -d $current_path/web ]; then
-    \cp -rpf $current_path/web $ext_home
-fi
-log "复制/web目录完成"
-
 if [ -f $current_path/bin/custom_install.sh ]; then
     log "执行ext定制安装脚本"
     sh $current_path/bin/custom_install.sh

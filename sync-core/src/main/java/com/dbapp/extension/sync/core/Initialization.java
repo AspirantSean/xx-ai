@@ -147,7 +147,7 @@ public class Initialization implements ApplicationListener<ApplicationReadyEvent
         }
     }
 
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(3);
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(1);
 
     private void syncJob() {
         long period = GlobalAttribute.getPropertyLong("sync_schedule_period", 10);
