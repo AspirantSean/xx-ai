@@ -23,7 +23,7 @@ public class SyncApplication {
         try {
             SpringApplication application = new SpringApplication(SyncApplication.class);
             application.run(args);
-        } catch (ApplicationContextException e) {
+        } catch (Exception e) {
             log.error("启动失败", e);
             System.exit(0);
         }

@@ -15,7 +15,6 @@
             <dataSource type="POOLED">
                 <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
                 <property name="url" value="jdbc:mysql://basic:3306/bigdata-web?autoReconnect=true&amp;autoReconnectForPools=true&amp;useUnicode=true&amp;characterEncoding=utf8&amp;createDatabaseIfNotExist=true&amp;allowMultiQueries=true&amp;zeroDateTimeBehavior=convertToNull"/>
-<!--                <property name="url" value="jdbc:mysql://192.168.30.195:13306/bigdata-web?autoReconnect=true&amp;autoReconnectForPools=true&amp;useUnicode=true&amp;characterEncoding=utf8&amp;createDatabaseIfNotExist=true&amp;allowMultiQueries=true&amp;zeroDateTimeBehavior=convertToNull"/>-->
                 <property name="username" value="dbapp"/>
                 <property name="password" value="jY%kng8cc&amp;"/>
             </dataSource>
@@ -24,8 +23,7 @@
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
                 <property name="driver" value="org.postgresql.Driver"/>
-                <property name="url" value="jdbc:postgresql://postgres:5432/ailpha?currentSchema=bigdata_web&amp;AutoReconnect=true&amp;TimeZone=UTC&amp;tcpKeepAlive=true&amp;charSet=UTF8"/>
-<!--                <property name="url" value="jdbc:postgresql://10.70.70.107:15432/ailpha?currentSchema=bigdata_web&amp;AutoReconnect=true&amp;TimeZone=UTC&amp;tcpKeepAlive=true&amp;charSet=UTF8"/>-->
+                <property name="url" value="jdbc:postgresql://1.postgresql1:5432/ailpha?currentSchema=bigdata_web&amp;AutoReconnect=true&amp;TimeZone=UTC&amp;tcpKeepAlive=true&amp;charSet=UTF8"/>
                 <property name="username" value="dbapp"/>
                 <property name="password" value="jY%kng8cc&amp;"/>
             </dataSource>

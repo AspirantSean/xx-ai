@@ -24,6 +24,7 @@
         </RollingFile>
 
         <RollingFile name="ConsoleLog" fileName="${log.path}/console.log" filePattern="${log.path}/console.%i.log">
+            <ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1.} - %msg%n}{STYLE=Logback}"/>
             <SizeBasedTriggeringPolicy size="64MB"/>
             <DefaultRolloverStrategy max="10"/>
