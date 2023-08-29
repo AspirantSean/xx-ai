@@ -1,4 +1,5 @@
 file-----type-----key-----value-----description
+application.properties-----update-----spring.flyway.enabled-----true-----
 application.properties-----insert-----xxl.job.admin.addresses-----https://1.bigdata1:9001-----
 application.properties-----insert-----xxl.job.executor.app-name-----${spring.application.name}-----
 application.properties-----insert-----xxl.job.accessToken-----ailpha-job-----
