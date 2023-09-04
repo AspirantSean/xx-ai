@@ -97,7 +97,13 @@ if [[ $action == "update" ]]; then
             #删除配置
             if [[ $operation_type == "delete" ]]; then
                 log "移除配置项：$properties_key"
-                sed -i s#^$properties_key.*##g $properties_file
+                cmd="sed -i '/^$properties_key=/d' $properties_file"
+                eval $cmd
+                if [[ ! -z $properties_description ]]; then
+                  properties_desc=${properties_description%%,*}
+                  cmd="sed -i '/^$properties_desc/d' $properties_file"
+                  eval $cmd
+                fi
                 continue
             fi
 
@@ -109,6 +115,7 @@ if [[ $action == "update" ]]; then
                 property_content="$properties_description\n$properties_key=$properties_value"
             fi
             #如果不存在配置则为新增操作
+            operation_type=update
             if [[ -z `cat $properties_file | grep $properties_key` ]]; then
                 operation_type=insert
             fi
@@ -118,11 +125,18 @@ if [[ $action == "update" ]]; then
                 log "新增配置项描述：$properties_description"
                 echo -e "\n$property_content" >> $properties_file
             elif [[ $operation_type == "update" ]]; then
+                #删除原有配置项描述
+                if [[ ! -z $properties_description ]]; then
+                    properties_desc=${properties_description%%,*}
+                    cmd="sed -i '/^$properties_desc/d' $properties_file"
+                    eval $cmd
+                fi
                 #修改配置
                 log "修改配置项：$properties_key=$properties_value 至 $properties_file"
                 log "修改配置项描述：$properties_description"
                 quotation="'"
                 property_content=${property_content//#/\\#}
+                property_content=$(echo $property_content |sed 's/&/\\&/g')
                 cmd="sed -i s#^$properties_key.*#$quotation$property_content$quotation#g $properties_file"
                 eval $cmd
             fi
