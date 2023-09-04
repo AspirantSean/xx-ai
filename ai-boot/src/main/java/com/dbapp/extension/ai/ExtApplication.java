@@ -1,6 +1,8 @@
 package com.dbapp.extension.ai;
 
+import com.dbapp.utils.Log4j2Util;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -19,6 +21,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @Slf4j
 public class ExtApplication {
+
+    static {
+        Log4j2Util.setLog4j2Context();
+    }
+
     public static void main(String[] args) {
         try {
             SpringApplication application = new SpringApplication(ExtApplication.class);

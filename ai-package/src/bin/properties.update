@@ -1,9 +1,8 @@
 file-----type-----key-----value-----description
 application.properties-----update-----spring.flyway.enabled-----true-----
-application.properties-----insert-----xxl.job.admin.addresses-----https://1.bigdata1:9001-----
+application.properties-----insert-----xxl.job.admin.addresses-----https://basic-----
 application.properties-----insert-----xxl.job.executor.app-name-----${spring.application.name}-----
 application.properties-----insert-----xxl.job.accessToken-----ailpha-job-----
-application.properties-----insert-----xxl.job.executor.address-----http://1.ai1:${server.port}-----
 application.properties-----insert-----xxl.job.executor.log-path-----logs/job-handler-----
 application.properties-----insert-----xxl.job.executor.log-retention-days-----7-----
 application.properties-----update-----spring.datasource.jdbc-url-----jdbc:postgresql://basic:5432/ailpha?currentSchema=ai&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull-----

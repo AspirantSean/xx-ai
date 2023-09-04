@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 @Configuration
 public class XxlJobConfig {
 
@@ -21,8 +24,11 @@ public class XxlJobConfig {
     @Value("${xxl.job.executor.app-name}")
     private String appName;
 
-    @Value("${xxl.job.executor.address}")
-    private String address;
+    @Value("${server.port:9001}")
+    private Integer port;
+
+    @Value("${server.ssl.enabled:false}")
+    private boolean ssl;
 
     @Value("${xxl.job.executor.log-path}")
     private String logPath;
@@ -32,6 +38,8 @@ public class XxlJobConfig {
 
     @Bean
     public XxlJobSpringExecutor xxlJobSpringExecutor() {
+        String protocol = ssl ? "https://" : "http://";
+        String address = protocol + getLocalIp() + ":" + port;
         logger.info(">>>>>>>>>>>>> xxl-job config init.");
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(adminAddress);
@@ -41,5 +49,14 @@ public class XxlJobConfig {
         xxlJobSpringExecutor.setLogPath(logPath);
         xxlJobSpringExecutor.setLogRetentionDays(logRetentionDays);
         return xxlJobSpringExecutor;
+    }
+
+    private String getLocalIp() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            logger.warn(e.getMessage(), e);
+            return "1.ai1";
+        }
     }
 }

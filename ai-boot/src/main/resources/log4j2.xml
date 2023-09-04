@@ -3,20 +3,21 @@
 <configuration status="INFO" monitorInterval="60">
     <Properties>
         <Property name="log.path">logs</Property>
+        <Property name="hostname">${ctx:hostname}</Property>
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1.} - %msg%n}{STYLE=Logback}"/>
         </Console>
 
-        <RollingFile name="RollingFile" fileName="${log.path}/main.log" filePattern="${log.path}/main.%i.log">
+        <RollingFile name="RollingFile" fileName="${log.path}/main.log" filePattern="${log.path}/main.${hostname}.%i.log">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}][%-5level][%F:%L] - %m%n" />
             <SizeBasedTriggeringPolicy size="64MB"/>
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
 
-        <RollingFile name="errorLog" fileName="${log.path}/error.log" filePattern="${log.path}/error.%i.log">
+        <RollingFile name="errorLog" fileName="${log.path}/error.log" filePattern="${log.path}/error.${hostname}.%i.log">
             <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}][%-5level][%F:%L] - %m%n" />
             <SizeBasedTriggeringPolicy size="64MB" />
