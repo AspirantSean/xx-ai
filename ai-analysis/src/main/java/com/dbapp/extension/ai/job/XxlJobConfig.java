@@ -36,10 +36,13 @@ public class XxlJobConfig {
     @Value("${xxl.job.executor.log-retention-days}")
     private int logRetentionDays;
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
     @Bean
     public XxlJobSpringExecutor xxlJobSpringExecutor() {
         String protocol = ssl ? "https://" : "http://";
-        String address = protocol + getLocalIp() + ":" + port;
+        String address = protocol + getLocalIp() + ":" + port + contextPath;
         logger.info(">>>>>>>>>>>>> xxl-job config init.");
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(adminAddress);
