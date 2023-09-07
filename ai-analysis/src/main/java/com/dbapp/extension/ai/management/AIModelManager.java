@@ -8,6 +8,7 @@ import com.dbapp.extension.job.entity.JobInfo;
 import com.dbapp.extension.job.service.XxlJobService;
 import com.dbapp.extension.mirror.dto.AIModel;
 import com.dbapp.job.core.enums.EditTypeEnum;
+import com.dbapp.job.core.enums.MisfireStrategyEnum;
 import com.dbapp.job.core.enums.ScheduleTypeEnum;
 import com.dbapp.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,7 @@ public final class AIModelManager {
         jobInfo.setHandler("ai-server-polling-job");
         jobInfo.setDesc("ai服务定时拉取模型，并更新现有ai模型任务");
         jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE);
+        jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW);
         jobInfo.setScheduleConf(IntervalUnit.valueOf(intervalUnit).translateToSecond(interval) + "");
         jobInfo.setTriggerStatus(true);
         jobInfo.setEditType(EditTypeEnum.NONE);
@@ -208,6 +210,7 @@ public final class AIModelManager {
         jobInfo.setHandler("ai-server-executor-job");
         jobInfo.setDesc("ai服务定时执行ai模型");
         jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE);
+        jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW);
         jobInfo.setScheduleConf(aiModelProcess.getIntervalUnit().translateToSecond(aiModelProcess.getInterval()) + "");
         jobInfo.setTriggerStatus(true);
         jobInfo.setEditType(EditTypeEnum.NONE);
