@@ -1,5 +1,6 @@
 package com.dbapp.extension.ai.job;
 
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -11,14 +12,13 @@ import com.dbapp.extension.ai.utils.GlobalAttribute;
 import com.dbapp.extension.ai.utils.MetricEsUtil;
 import com.dbapp.extension.ai.utils.SystemProperUtil;
 import com.dbapp.extension.mirror.dto.MetricInfo;
+import com.dbapp.job.core.context.XxlJobContext;
 import com.dbapp.job.core.context.XxlJobHelper;
 import com.dbapp.job.core.enums.EditTypeEnum;
 import com.dbapp.job.core.enums.ScheduleTypeEnum;
 import com.dbapp.job.core.handler.annotation.XxlJob;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class AIModelAnalysisJob {
-    private static final Logger LOG = LoggerFactory.getLogger(AIModelAnalysisJob.class);
 
     /**
      * 文件/目录路径
@@ -63,6 +62,32 @@ public class AIModelAnalysisJob {
         new AIModelAnalysisExecutor(aiModelProcess).execute();
     }
 
+    private void log(String message, Object... params) {
+        XxlJobContext xxlJobContext = XxlJobContext.getXxlJobContext();
+        XxlJobHelper.log(xxlJobContext, message, params);
+    }
+
+    private void log(String message, List<?> params) {
+        XxlJobContext xxlJobContext = XxlJobContext.getXxlJobContext();
+        String param = "";
+        if (CollUtil.isNotEmpty(params)) {
+            param = params.stream()
+                    .map(Object::toString)
+                    .collect(Collectors.joining(";\n", "\n", "."));
+        }
+        XxlJobHelper.log(xxlJobContext, message, param);
+    }
+
+    private void error(String message, Object... params) {
+        XxlJobContext xxlJobContext = XxlJobContext.getXxlJobContext();
+        XxlJobHelper.log(xxlJobContext, message, params);
+    }
+
+    private void error(String message, Throwable cause) {
+        XxlJobContext xxlJobContext = XxlJobContext.getXxlJobContext();
+        XxlJobHelper.log(xxlJobContext, message);
+        XxlJobHelper.log(xxlJobContext, cause);
+    }
 
     private class AIModelAnalysisExecutor {
 
@@ -89,7 +114,6 @@ public class AIModelAnalysisJob {
 
         /**
          * 准备工作数据，若获取过模型和指标数据，再次运行时不再获取
-         *
          */
         private void beforeAnalysis() {
             try {
@@ -122,9 +146,9 @@ public class AIModelAnalysisJob {
                     FileUtils.deleteQuietly(file);
                 }
                 boolean success = file.mkdirs();
-                LOG.info("AI模型任务 {}-{} 数据准备完成，缓存文件目录：{}，创建{}。", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), this.pythonDataCache, success ? "成功" : "失败");
+                log("AI模型任务 {}-{} 数据准备完成，缓存文件目录：{}，创建{}。", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), this.pythonDataCache, success ? "成功" : "失败");
             } catch (IOException ioe) {
-                LOG.error(String.format("AI模型任务 %s-%s 准备数据异常", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName()), ioe);
+                error(String.format("AI模型任务 %s-%s 准备数据异常", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName()), ioe);
             }
         }
 
@@ -178,10 +202,10 @@ public class AIModelAnalysisJob {
                     }
                     this.aiModelProcess.removeAndDestroyProcess(algorithmId);
                 } catch (Exception e) {
-                    LOG.error(String.format("AI模型任务 %s-%s 算法(%s)调用异常", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId), e);
+                    error(String.format("AI模型任务 %s-%s 算法(%s)调用异常", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId), e);
                 }
             }
-            LOG.info("AI模型任务 {}-{} 算法调用结果：{}", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), analysisResponse.toString());
+            log("AI模型任务 {}-{} 算法调用结果：{}", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), analysisResponse.toString());
         }
 
         /**
@@ -192,7 +216,7 @@ public class AIModelAnalysisJob {
          */
         private boolean validate(String algorithmId) {
             if (StringUtils.isBlank(algorithmId)) {
-                LOG.info("AI模型任务 {}-{} 算法id为空。", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName());
+                log("AI模型任务 {}-{} 算法id为空。", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName());
                 return false;
             }
             String periodMin = this.algorithmProperties.getProperty(String.format("%s.periodMin", algorithmId),
@@ -202,7 +226,7 @@ public class AIModelAnalysisJob {
             Double min = rangeOfData(periodMin, "10m");
             Double max = rangeOfData(periodMax, "10m");
             if (this.originalMetricData.size() <= min || this.originalMetricData.size() > max) {
-                LOG.info("AI模型任务 {}-{} 指标数据不在算法({})计算区间内，指标数据数量为{}，算法数据范围为[{},{}]。当前指标暂时不能使用此算法。",
+                log("AI模型任务 {}-{} 指标数据不在算法({})计算区间内，指标数据数量为{}，算法数据范围为[{},{}]。当前指标暂时不能使用此算法。",
                         this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId, this.originalMetricData.size(), min, max);
                 return false;
             }
@@ -224,7 +248,7 @@ public class AIModelAnalysisJob {
                         data.add(storeData);
                     }
                 } catch (IOException e) {
-                    LOG.error(String.format("AI模型任务 %s-%s 算法(%s)缓存文件读取异常", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId), e);
+                    error(String.format("AI模型任务 %s-%s 算法(%s)缓存文件读取异常", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId), e);
                 }
             });
             // 删除模型运行结果历史数据
@@ -234,7 +258,7 @@ public class AIModelAnalysisJob {
                 insertNum = aiAnomalyAnalysisMapper.saveAiAnalysisData(data);
             }
             boolean isDelete = FileUtils.deleteQuietly(new File(this.pythonDataCache));
-            LOG.info("AI模型任务 {}-{} 分析完成，删除历史计算数据{}条，插入新数据{}条，删除缓存文件{}", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), deleteNum, insertNum, isDelete ? "成功" : "失败");
+            log("AI模型任务 {}-{} 分析完成，删除历史计算数据{}条，插入新数据{}条，删除缓存文件{}", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), deleteNum, insertNum, isDelete ? "成功" : "失败");
         }
 
         /**
@@ -249,7 +273,7 @@ public class AIModelAnalysisJob {
             String dataPath = String.format("%s/%s.json", this.pythonDataCache, algorithmId);
             File file = new File(dataPath);
             if (!file.exists()) {
-                LOG.warn("AI模型任务 {}-{} 算法({})运行异常，分析结果缓存文件{}不存在", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId, dataPath);
+                error("AI模型任务 {}-{} 算法({})运行异常，分析结果缓存文件{}不存在", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId, dataPath);
                 return null;
             }
             String jsonStr = FileUtils.readFileToString(file, "utf-8");// 文件中的数据
@@ -258,7 +282,7 @@ public class AIModelAnalysisJob {
                 judgeObject.put(algorithmId, Collections.singletonMap("prejudgeResult", Boolean.FALSE));
                 jsonStr = judgeObject.toJSONString();
             } else if (StringUtils.isBlank(jsonStr) || !jsonStr.trim().startsWith("{")) {
-                LOG.warn("AI模型任务 {}-{} 算法({})运行异常，分析结果格式不正确", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId, dataPath);
+                error("AI模型任务 {}-{} 算法({})运行异常，分析结果格式不正确", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId, dataPath);
                 return null;
             }
             // 2、分析数据转为json，org.json.JSONObject容错的范围更大
@@ -294,7 +318,7 @@ public class AIModelAnalysisJob {
             analysisData.put("createTime", this.createTime);
             analysisData.put("modelId", this.aiModelProcess.getAiModel().getRuleId());
             analysisData.put("algorithmId", algorithmId);
-            LOG.info("AI模型任务 {}-{} 算法({})分析完成，数据ID：{}", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId, analysisData.get("id"));
+            log("AI模型任务 {}-{} 算法({})分析完成，数据ID：{}", this.aiModelProcess.getJobGroupName(), this.aiModelProcess.getJobName(), algorithmId, analysisData.get("id"));
             return analysisData;
         }
 
