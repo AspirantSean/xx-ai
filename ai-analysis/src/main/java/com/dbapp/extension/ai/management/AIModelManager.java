@@ -36,6 +36,8 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+        // 启动时清理任务重新加载
+        xxlJobService.deleteByHandler("ai-server-executor-job");
         initializeJob();
     }
 
@@ -198,7 +200,7 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
                     if (this.runtimeAiModelProcessCache.containsKey(jobInfo.getOtherKey())) {
                         return jobInfo.getOtherKey();
                     }
-                    // 清楚不包含在可运行的模型中的已有任务调度
+                    // 清除不包含在可运行的模型中的已有任务调度
                     xxlJobService.deleteByOtherKey(jobInfo.getOtherKey());
                     return null;
                 })
