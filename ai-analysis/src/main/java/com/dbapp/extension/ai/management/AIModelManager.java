@@ -42,6 +42,7 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
             initializeJob();
         } catch (Exception e) {
             log.error("启动时清理任务重新加载异常", e);
+            System.exit(0);
         }
     }
 
