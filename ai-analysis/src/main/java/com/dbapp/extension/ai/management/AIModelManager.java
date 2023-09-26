@@ -36,9 +36,13 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        // 启动时清理任务重新加载
-        xxlJobService.deleteByHandler("ai-server-executor-job");
-        initializeJob();
+        try {
+            // 启动时清理任务重新加载
+            xxlJobService.deleteByHandler("ai-server-executor-job");
+            initializeJob();
+        } catch (Exception e) {
+            log.error("启动时清理任务重新加载异常", e);
+        }
     }
 
     /**
