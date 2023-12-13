@@ -7,9 +7,9 @@ import com.dbapp.extension.mirror.dto.AIModel;
 import com.dbapp.extension.mirror.dto.MetricInfo;
 import com.dbapp.extension.mirror.rpc.IBaasClient;
 import com.dbapp.extension.mirror.rpc.IMetricClient;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 

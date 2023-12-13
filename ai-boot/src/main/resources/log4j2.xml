@@ -6,7 +6,7 @@
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1.} - %msg%n}{STYLE=Logback}"/>
+            <PatternLayout pattern="%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{[%-5p]} %clr{%pid}{magenta} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %msg%xEx%n"/>
         </Console>
 
         <RollingFile name="RollingFile" fileName="${log.path}/main.log" filePattern="${log.path}/main.%i.log">

@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum DataSourceType {
-    pg("postgresql", "classpath*:mappers/*Mapper.xml"),
-    gauss("opengauss", "classpath*:mappers/gauss/*Mapper-gauss.xml"),
-    mysql("mysql", "classpath*:mappers/mysql/*Mapper-mysql.xml");
+    POSTGRESQL("postgresql", "classpath*:mappers/*Mapper.xml"),
+    GAUSS("opengauss", "classpath*:mappers/gauss/*Mapper-gauss.xml"),
+    MYSQL("mysql", "classpath*:mappers/mysql/*Mapper-mysql.xml");
     private String value;
     private String locations;
 

@@ -3,13 +3,13 @@ package com.dbapp.extension.ai.job;
 import com.dbapp.extension.ai.api.service.IBigdataService;
 import com.dbapp.extension.ai.management.AIModelManager;
 import com.dbapp.extension.mirror.dto.AIModel;
-import com.dbapp.job.core.context.XxlJobHelper;
-import com.dbapp.job.core.enums.EditTypeEnum;
-import com.dbapp.job.core.enums.ScheduleTypeEnum;
-import com.dbapp.job.core.handler.annotation.XxlJob;
+import com.xxl.job.core.context.XxlJobHelper;
+import com.xxl.job.core.enums.EditTypeEnum;
+import com.xxl.job.core.enums.ScheduleTypeEnum;
+import com.xxl.job.core.handler.annotation.XxlJob;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 

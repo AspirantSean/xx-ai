@@ -12,16 +12,16 @@ import com.dbapp.extension.ai.utils.GlobalAttribute;
 import com.dbapp.extension.ai.utils.MetricEsUtil;
 import com.dbapp.extension.ai.utils.SystemProperUtil;
 import com.dbapp.extension.mirror.dto.MetricInfo;
-import com.dbapp.job.core.context.XxlJobContext;
-import com.dbapp.job.core.context.XxlJobHelper;
-import com.dbapp.job.core.enums.EditTypeEnum;
-import com.dbapp.job.core.enums.ScheduleTypeEnum;
-import com.dbapp.job.core.handler.annotation.XxlJob;
+import com.xxl.job.core.context.XxlJobContext;
+import com.xxl.job.core.context.XxlJobHelper;
+import com.xxl.job.core.enums.EditTypeEnum;
+import com.xxl.job.core.enums.ScheduleTypeEnum;
+import com.xxl.job.core.handler.annotation.XxlJob;
+import jakarta.annotation.Resource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,7 +64,7 @@ public class AIModelAnalysisJob {
 
     private void log(String message, Object... params) {
         XxlJobContext xxlJobContext = XxlJobContext.getXxlJobContext();
-        XxlJobHelper.log(xxlJobContext, message, params);
+        XxlJobHelper.log(message, params);
     }
 
     private void log(String message, List<?> params) {
@@ -75,18 +75,18 @@ public class AIModelAnalysisJob {
                     .map(Object::toString)
                     .collect(Collectors.joining(";\n", "\n", "."));
         }
-        XxlJobHelper.log(xxlJobContext, message, param);
+        XxlJobHelper.log(message, param);
     }
 
     private void error(String message, Object... params) {
         XxlJobContext xxlJobContext = XxlJobContext.getXxlJobContext();
-        XxlJobHelper.log(xxlJobContext, message, params);
+        XxlJobHelper.log(message, params);
     }
 
     private void error(String message, Throwable cause) {
         XxlJobContext xxlJobContext = XxlJobContext.getXxlJobContext();
-        XxlJobHelper.log(xxlJobContext, message);
-        XxlJobHelper.log(xxlJobContext, cause);
+        XxlJobHelper.log(message);
+        XxlJobHelper.log(cause);
     }
 
     private class AIModelAnalysisExecutor {

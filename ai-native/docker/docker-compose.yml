@@ -1,0 +1,29 @@
+version: "3"
+services:
+  ai:
+    image: ailpha-registry:5000/ai:v1.0.1
+    container_name: 1-Ai-1
+    #加入环境变量文件 .env
+    env_file:
+      - midware.env
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+      resources:
+        limits:
+          memory:  6G
+    healthcheck:
+      test: curl -fs http://localhost:8902/ || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 20
+    hostname: 1-Ai-1
+    volumes:
+      - /data/1-Ai-1/logs:/usr/hdp/20231103/app-ai/
+      - /data/1-Ai-1/data:/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - cilium-net
+networks:
+  cilium-net:
+    external: true

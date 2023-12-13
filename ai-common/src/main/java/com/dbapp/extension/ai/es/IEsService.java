@@ -1,7 +1,7 @@
 package com.dbapp.extension.ai.es;
 
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
+import com.dbapp.flexsdk.nativees.action.search.SearchRequest;
+import com.dbapp.flexsdk.nativees.action.search.SearchResponse;
 
 import java.io.IOException;
 

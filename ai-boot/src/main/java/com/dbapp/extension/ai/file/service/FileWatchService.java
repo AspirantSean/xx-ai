@@ -7,10 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class FileWatchService implements DisposableBean, Runnable {
@@ -20,7 +21,7 @@ public class FileWatchService implements DisposableBean, Runnable {
     private Thread thread;
 
     public FileWatchService() {
-        this.thread = new Thread(this);
+        this.thread = new Thread(this,"file watcher");
         this.thread.start();
     }
 
@@ -65,12 +66,12 @@ public class FileWatchService implements DisposableBean, Runnable {
 
         } catch (IOException | InterruptedException ex) {
             logger.error(ex.getMessage(), ex);
-            Thread.currentThread().interrupt();
         }
     }
 
     @Override
     public void destroy() {
+        thread.interrupt();
         logger.info("Destroy FileWatchService.");
     }
 

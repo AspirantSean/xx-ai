@@ -34,15 +34,15 @@ public class DataSource {
     /**
      * 数据库连接
      */
-    @Value("${spring.datasource.jdbc-url}")
+    @Value("${ailpha.datasource.jdbc-url}")
     private String url;
-    @Value("${spring.datasource.username}")
+    @Value("${ailpha.datasource.username}")
     private String userName;
-    @Value("${spring.datasource.password}")
+    @Value("${ailpha.datasource.password}")
     private String passWord;
-    @Value("${spring.datasource.driver-class-name}")
+    @Value("${ailpha.datasource.driver-class-name}")
     private String driverClass;
-    @Value("${datasource.type}")
+    @Value("${ailpha.datasource.type}")
     private String dataSourceType;
 
     /**
@@ -50,7 +50,7 @@ public class DataSource {
      */
     @Primary
     @Bean(name = "primaryDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource")
+    @ConfigurationProperties(prefix = "ailpha.datasource")
     public javax.sql.DataSource primaryDataSource() {
         javax.sql.DataSource dataSource = DataSourceBuilder.create().build();
         if (dataSource instanceof HikariDataSource) {
@@ -103,9 +103,9 @@ public class DataSource {
         try {
             String locations;
             if (StringUtils.isEmpty(dataSourceType)) {
-                locations = DataSourceType.pg.getLocations();
+                locations = DataSourceType.POSTGRESQL.getLocations();
             } else {
-                DataSourceType dataSourceType = DataSourceType.valueOfName(this.dataSourceType);
+                DataSourceType dataSourceType = DataSourceType.valueOfName(StringUtils.upperCase(this.dataSourceType));
                 if (dataSourceType == null) {
                     log.error("数据源类型配置错误，请检查application.properties中datasource.type配置");
                     throw new RuntimeException("数据源类型配置错误，请检查application.properties中datasource.type配置");

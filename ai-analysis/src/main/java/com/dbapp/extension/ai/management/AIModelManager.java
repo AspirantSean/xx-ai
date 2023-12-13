@@ -1,24 +1,25 @@
 package com.dbapp.extension.ai.management;
 
 import cn.hutool.core.collection.CollUtil;
+import com.dbapp.extension.ai.job.JobService;
 import com.dbapp.extension.ai.management.runtime.process.AIModelProcess;
 import com.dbapp.extension.ai.mapper.AIAnomalyAnalysisMapper;
 import com.dbapp.extension.ai.utils.GlobalAttribute;
-import com.dbapp.extension.job.entity.JobInfo;
-import com.dbapp.extension.job.service.XxlJobService;
 import com.dbapp.extension.mirror.dto.AIModel;
-import com.dbapp.job.core.context.XxlJobHelper;
-import com.dbapp.job.core.enums.EditTypeEnum;
-import com.dbapp.job.core.enums.MisfireStrategyEnum;
-import com.dbapp.job.core.enums.ScheduleTypeEnum;
+import com.xxl.job.core.biz.model.JobInfoResult;
+import com.xxl.job.core.biz.model.RegistryJobParam;
+import com.xxl.job.core.context.XxlJobHelper;
+import com.xxl.job.core.enums.EditTypeEnum;
+import com.xxl.job.core.enums.MisfireStrategyEnum;
+import com.xxl.job.core.enums.ScheduleTypeEnum;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 public final class AIModelManager implements ApplicationListener<ApplicationReadyEvent> {
 
     @Resource
-    private XxlJobService xxlJobService;
+    private JobService jobService;
     @Resource
     private AIAnomalyAnalysisMapper aiAnomalyAnalysisMapper;
 
@@ -38,7 +39,7 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
     public void onApplicationEvent(ApplicationReadyEvent event) {
         try {
             // 启动时清理任务重新加载
-            xxlJobService.deleteByHandler("ai-server-executor-job");
+            jobService.deleteByHandler("ai-server-executor-job");
             initializeJob();
         } catch (Exception e) {
             log.error("启动时清理任务重新加载异常", e);
@@ -62,19 +63,19 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
                 configCache.put("interval", interval);
                 configCache.put("intervalUnit", intervalUnit);
             }
-            xxlJobService.deleteByOtherKey("ai-server-polling-job");
-            JobInfo jobInfo = new JobInfo();
-            jobInfo.setName("ai服务定时拉取模型任务");
-            jobInfo.setHandler("ai-server-polling-job");
-            jobInfo.setDesc("ai服务定时拉取模型，并更新现有ai模型任务");
-            jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE);
-            jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW);
+            jobService.deleteByOtherKey("ai-server-polling-job");
+            RegistryJobParam jobInfo = new RegistryJobParam();
+            jobInfo.setJobName("ai服务定时拉取模型任务");
+            jobInfo.setExecutorHandler("ai-server-polling-job");
+            jobInfo.setJobDesc("ai服务定时拉取模型，并更新现有ai模型任务");
+            jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE.name());
+            jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW.name());
             jobInfo.setScheduleConf(IntervalUnit.valueOf(intervalUnit).translateToSecond(interval) + "");
-            jobInfo.setTriggerStatus(true);
-            jobInfo.setEditType(EditTypeEnum.NONE);
+            jobInfo.setTriggerStatus(1);
+            jobInfo.setType(EditTypeEnum.NONE.getCode());
             jobInfo.setManual(true);
             jobInfo.setOtherKey("ai-server-polling-job");
-            xxlJobService.addJob(jobInfo);
+            jobService.addJob(jobInfo);
             executeJobNow("ai-server-polling-job");
             log.info("加入ai服务定时拉取模型任务成功，并手动调用一次");
         } catch (Exception e) {
@@ -136,15 +137,15 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
         adjustCache();
         // 移除任务
         // 先查到所有任务
-        final Map<String, JobInfo> jobInfoList = Optional.ofNullable(xxlJobService.getJobsByHandler("ai-server-executor-job"))
+        final Map<String, JobInfoResult> jobInfoList = Optional.ofNullable(jobService.getJobsByHandler("ai-server-executor-job"))
                 .filter(CollUtil::isNotEmpty)
                 .orElseGet(ArrayList::new)
                 .stream()
-                .collect(Collectors.toMap(JobInfo::getOtherKey, jobInfo -> jobInfo));
+                .collect(Collectors.toMap(JobInfoResult::getOtherKey, jobInfo -> jobInfo));
         this.removeRuntimeAiModelProcessCache.forEach((ruleId, aiModelProcess) -> {
             aiModelProcess.destroy();
-            JobInfo jobInfo = jobInfoList.get(aiModelProcess.getJobKey());
-            xxlJobService.deleteByOtherKey(jobInfo.getOtherKey());
+            JobInfoResult jobInfo = jobInfoList.get(aiModelProcess.getJobKey());
+            jobService.deleteByOtherKey(jobInfo.getOtherKey());
         });
         if (!this.removeRuntimeAiModelProcessCache.isEmpty()) {
             XxlJobHelper.log("轮询AI模型任务：移除AI模型任务-{}", String.join(",", this.removeRuntimeAiModelProcessCache.keySet()));
@@ -197,7 +198,7 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
     private synchronized void validateExistAIJob() {
         XxlJobHelper.log("轮询AI模型任务：校验运行中的任务调度与缓存管理中的是否一致");
         // 先查到所有任务
-        List<String> runningJobs = Optional.ofNullable(xxlJobService.getJobsByHandler("ai-server-executor-job"))
+        List<String> runningJobs = Optional.ofNullable(jobService.getJobsByHandler("ai-server-executor-job"))
                 .filter(CollUtil::isNotEmpty)
                 .orElseGet(ArrayList::new)
                 .stream()
@@ -206,7 +207,7 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
                         return jobInfo.getOtherKey();
                     }
                     // 清除不包含在可运行的模型中的已有任务调度
-                    xxlJobService.deleteByOtherKey(jobInfo.getOtherKey());
+                    jobService.deleteByOtherKey(jobInfo.getOtherKey());
                     return null;
                 })
                 .collect(Collectors.toList());
@@ -219,31 +220,31 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
     }
 
     private void addAiModelJob(AIModelProcess aiModelProcess) {
-        JobInfo jobInfo = new JobInfo();
-        jobInfo.setName("ai服务模型定时任务");
-        jobInfo.setHandler("ai-server-executor-job");
-        jobInfo.setDesc("ai服务定时执行ai模型");
-        jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE);
-        jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW);
+        RegistryJobParam jobInfo = new RegistryJobParam();
+        jobInfo.setJobName("ai服务模型定时任务");
+        jobInfo.setExecutorHandler("ai-server-executor-job");
+        jobInfo.setJobDesc("ai服务定时执行ai模型");
+        jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE.name());
+        jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW.name());
         jobInfo.setScheduleConf(aiModelProcess.getIntervalUnit().translateToSecond(aiModelProcess.getInterval()) + "");
-        jobInfo.setTriggerStatus(true);
-        jobInfo.setEditType(EditTypeEnum.NONE);
+        jobInfo.setTriggerStatus(1);
+        jobInfo.setType(EditTypeEnum.NONE.getCode());
         jobInfo.setManual(true);
         jobInfo.setOtherKey(aiModelProcess.getJobKey());
         jobInfo.setExecutorParam(aiModelProcess.getJobKey());
-        xxlJobService.addJob(jobInfo);
+        jobService.addJob(jobInfo);
         boolean success = executeJobNow(aiModelProcess.getJobKey());
         XxlJobHelper.log("增加任务-{}，并手动执行{}", jobInfo.getOtherKey(), success ? "成功" : "失败");
     }
 
     private boolean executeJobNow(String otherKey) {
-        JobInfo jobInfo = xxlJobService.getJobByOtherKey(otherKey);
+        JobInfoResult jobInfo = jobService.getJobByOtherKey(otherKey);
         if (jobInfo == null) {
             XxlJobHelper.log("当前任务不存在，无法立即执行，otherKey = {}", otherKey);
             return false;
         }
         // 启动一次任务
-        return xxlJobService.trigger(jobInfo.getJobId());
+        return jobService.trigger(jobInfo.getId());
     }
 
     /**

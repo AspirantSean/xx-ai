@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ai
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDRESS:10.70.70.85}:${NACOS_SERVER_PORT:8848}
+      discovery:
+        secure: true
+        namespace: nacosid_ailpha_zq
+      username: ${NACOS_AUTH_IDENTITY_KEY:nacos}
+      password: ${NACOS_AUTH_IDENTITY_VALUE:nacos}
+      config:
+        namespace: nacosid_ailpha_zq
+        shared-configs:
+          - data-id: common-config
+            refresh: true
+        file-extension: yaml
+logging:
+  config: classpath:log4j2.xml
