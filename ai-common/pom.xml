@@ -35,7 +35,10 @@
             <artifactId>reflections</artifactId>
             <version>0.9.10</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.dbapp.extension.mirror</groupId>
+            <artifactId>ailpha-base-rpc</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>

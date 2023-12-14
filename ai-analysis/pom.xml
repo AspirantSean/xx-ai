@@ -12,10 +12,7 @@
     <artifactId>ai-analysis</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.dbapp.extension.mirror</groupId>
-            <artifactId>ailpha-base-rpc</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>com.dbapp.extension.ai</groupId>
             <artifactId>ai-common</artifactId>

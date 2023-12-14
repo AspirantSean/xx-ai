@@ -3,9 +3,9 @@ package com.dbapp.extension.ai.api.service.impl;
 
 import com.dbapp.extension.ai.api.invoker.BigdataInvoker;
 import com.dbapp.extension.ai.api.service.IBigdataService;
+import com.dbapp.extension.ai.baas.rpc.IBaasClient;
 import com.dbapp.extension.mirror.dto.AIModel;
 import com.dbapp.extension.mirror.dto.MetricInfo;
-import com.dbapp.extension.mirror.rpc.IBaasClient;
 import com.dbapp.extension.mirror.rpc.IMetricClient;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;

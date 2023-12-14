@@ -3,8 +3,16 @@ package com.dbapp.extension.ai.job;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.biz.model.*;
+import com.xxl.job.core.config.ExecutorProperties;
+import com.xxl.job.core.enums.ExecutorRouteStrategyEnum;
+import com.xxl.job.core.enums.MisfireStrategyEnum;
+import com.xxl.job.core.enums.ScheduleTypeEnum;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
+import com.xxl.job.core.glue.GlueTypeEnum;
+import jakarta.annotation.Resource;
+import jodd.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.xxl.job.core.enums.ExecutorBlockStrategyEnum.DISCARD_LATER;
+
 /**
  * @author steven.zhu
  * @version 1.0.0
@@ -20,6 +30,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service
 public class JobServiceImpl implements JobService {
+
+    @Resource
+    private ExecutorProperties executorProperties;
 
     private AtomicInteger counter = new AtomicInteger();
 
@@ -53,6 +66,30 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void addJob(RegistryJobParam jobInfo) {
+        jobInfo.setAppName(executorProperties.getAppname());
+        if (StringUtils.isBlank(jobInfo.getExecutorRouteStrategy())) {
+            jobInfo.setExecutorRouteStrategy(ExecutorRouteStrategyEnum.ROUND.name());
+        }
+
+        if (StringUtils.isBlank(jobInfo.getExecutorBlockStrategy())) {
+            jobInfo.setExecutorBlockStrategy(DISCARD_LATER.name());
+        }
+
+        if (StringUtils.isBlank(jobInfo.getMisfireStrategy())) {
+            jobInfo.setMisfireStrategy(MisfireStrategyEnum.DO_NOTHING.name());
+        }
+
+        if (StringUtils.isBlank(jobInfo.getScheduleType())) {
+            jobInfo.setScheduleType(ScheduleTypeEnum.CRON.name());
+        }
+
+        if (StringUtils.isBlank(jobInfo.getGlueType())) {
+            jobInfo.setGlueType(GlueTypeEnum.BEAN.name());
+        }
+
+        if (StringUtils.isBlank(jobInfo.getRegisterWay())) {
+            jobInfo.setRegisterWay("restful");
+        }
         AdminBiz adminBiz = nextClient();
         ReturnT<String> stringReturnT = adminBiz.addJob(jobInfo);
         if (stringReturnT.getCode() != 200) {
