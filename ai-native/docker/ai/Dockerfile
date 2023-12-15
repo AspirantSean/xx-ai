@@ -9,7 +9,7 @@ EXPOSE 8902/tcp
 
 #prepare 准备阶段，主要是定义工作目录
 
-ADD ailpha-ext-ai-* /usr/hdp/20231103/app-ai/
+ADD ${package-name} /usr/hdp/20231103/app-ai/
 
 ADD component/statsmodels.tar /usr/lib/python2.7/site-packages/
 ADD component/cpulimit /opt/

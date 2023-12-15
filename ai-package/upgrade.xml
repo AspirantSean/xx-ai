@@ -20,7 +20,17 @@
         <fileSet>
             <directory>../ai-native/docker/ai</directory>
             <outputDirectory>docker</outputDirectory>
+            <excludes>
+                <exclude>Dockerfile</exclude>
+            </excludes>
         </fileSet>
-
+        <fileSet>
+            <directory>../ai-native/docker/ai</directory>
+            <outputDirectory>docker</outputDirectory>
+            <filtered>true</filtered>
+            <includes>
+                <include>Dockerfile</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>
