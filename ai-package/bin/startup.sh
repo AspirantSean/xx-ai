@@ -26,6 +26,9 @@ setting_java_env() {
 
     JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir=/var/tmp"
 
+    JAVA_OPTS="$JAVA_OPTS --add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED"
+
+
     # TODO make sure java version is 17 or above
 }
 

@@ -55,4 +55,7 @@ stop() {
     fi
 }
 
+main_class='com.dbapp.extension.ai.ExtApplication'
+
+
 stop

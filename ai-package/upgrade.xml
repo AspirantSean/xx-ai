@@ -10,8 +10,8 @@
 
     <fileSets>
         <fileSet>
-            <directory>target/ailpha-ext-project</directory>
-            <outputDirectory>ailpha-ext-project</outputDirectory>
+            <directory>target/${package-name}</directory>
+            <outputDirectory>${package-name}</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>component</directory>

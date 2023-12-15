@@ -31,6 +31,9 @@
     <profiles>
         <profile>
             <id>Upgrade package</id>
+            <properties>
+                <package-name>ailpha-ext-${project.name}-${tag}-${buildNumber}_${backCommitId}-${maven.build.timestamp}</package-name>
+            </properties>
             <build>
                 <finalName>ailpha-ext-${project.name}-${tag}-${buildNumber}_${backCommitId}-${maven.build.timestamp}</finalName>
                 <plugins>
@@ -89,7 +92,6 @@
                                     <goal>single</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>ailpha-ext-project</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
                                         <descriptor>bin.xml</descriptor>
@@ -104,7 +106,6 @@
                                     <goal>single</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>ailpha-ext-${project.name}-${tag}-${buildNumber}_${backCommitId}-${maven.build.timestamp}</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
                                         <descriptor>upgrade.xml</descriptor>

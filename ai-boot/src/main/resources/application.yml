@@ -34,7 +34,7 @@ server:
 ailpha:
   datasource:
     type: postgresql
-    jdbc-url: jdbc:postgresql://${ailpha.default.pg.host:10.70.70.85}:${ailpha.default.pg.host:5432}/ailpha_zpf?currentSchema=ai&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull
+    jdbc-url: jdbc:postgresql://${ailpha.default.pg.host:10.70.70.85}:${ailpha.default.pg.host:5432}/ailpha?currentSchema=ai&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull
     username: ${ailpha.default.pg.username:dbapp}
     password: ${ailpha.default.pg.password:jY%kng8cc&}
     driver-class-name: org.postgresql.Driver
