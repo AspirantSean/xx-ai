@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dbapp.extension.ai.mapper.AiModelMapper">
+    <select id="listAiAnalysisAlgorithm" resultType="java.util.Map">
+        SELECT algorithm_id "algorithmId", algorithm_name "algorithmName"
+        FROM "ai"."ailpha_ai_analysis_algorithm"
+        <where>
+            <if test="list != null and list.size() != 0">
+                <foreach collection='list' item='id' open='algorithm_id in (' close=')' separator=','>
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="findAISceneAndAlgorithmBySceneId" resultType="java.util.Map">
+        SELECT algorithm.algorithm_name  AS "algorithmName",
+               algorithm.description     AS "content",
+               algorithm.patent::varchar AS "patent",
+               algorithm.paper::varchar  AS "paper",
+               algorithm.other           AS "other",
+               scene.scene_id            AS "sceneId",
+               scene.scene_no            AS "sceneNo",
+               scene.model_id            AS "modelId",
+               scene.algorithm_id        AS "algorithmId"
+        FROM "ai"."ailpha_ai_analysis_scene" scene,
+             "ai"."ailpha_ai_analysis_algorithm" algorithm
+        WHERE scene.scene_id = #{sceneId}
+          AND scene.is_enable = 'true'
+          AND algorithm.algorithm_id = scene.algorithm_id
+    </select>
+
+    <select id="findSceneBySceneIds" resultType="java.util.Map">
+        SELECT scene_id "sceneId", scene_no "sceneNo", model_id "modelId", algorithm_id "algorithmId"
+        FROM "ai"."ailpha_ai_analysis_scene"
+        <where>
+            is_enable = 'true'
+            <if test="list != null and list.size() != 0">
+                <foreach collection='list' item='id' open='AND scene_id IN (' close=')' separator=','>
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="findSceneBySceneId" resultType="java.util.Map">
+        SELECT scene_id "sceneId", scene_no "sceneNo", model_id "modelId", algorithm_id "algorithmId"
+        FROM "ai"."ailpha_ai_analysis_scene"
+        WHERE is_enable = 'true'
+          AND scene_id = #{sceneId}
+    </select>
+
+    <select id="listAiScene" resultType="java.util.Map">
+        SELECT scene_id "sceneId", scene_no "sceneNo", model_id "modelId", algorithm_id "algorithmId"
+        FROM "ai"."ailpha_ai_analysis_scene"
+        ORDER BY scene_no ASC
+    </select>
+
+    <delete id="clearAiScene">
+        DELETE
+        FROM "ai"."ailpha_ai_analysis_scene"
+    </delete>
+
+    <insert id="saveOrUpdateScene">
+        INSERT INTO "ai"."ailpha_ai_analysis_scene" (scene_id, scene_no, model_id, algorithm_id)
+                VALUES
+        <foreach collection='list' item='scene' separator=','>
+            (#{scene.sceneId, jdbcType=VARCHAR}, #{scene.sceneNo, jdbcType=INTEGER},
+             #{scene.modelId, jdbcType=VARCHAR}, #{scene.algorithmId, jdbcType=VARCHAR})
+        </foreach>
+        ON CONFLICT (scene_id)
+                DO UPDATE SET
+                        scene_no=EXCLUDED.scene_no,
+                        model_id=EXCLUDED.model_id,
+                        algorithm_id=EXCLUDED.algorithm_id
+    </insert>
+
+    <select id="findAiAnalysisDataByModelIdAndAlgorithmId" resultType="java.util.Map">
+        SELECT ui_data      "uiData",
+               create_time  "createTime",
+               model_id     "modelId",
+               algorithm_id "algorithmId"
+        FROM "ai"."ailpha_ai_analysis_data"
+        WHERE model_id = #{modelId}
+          AND algorithm_id = #{algorithmId}
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+</mapper>
