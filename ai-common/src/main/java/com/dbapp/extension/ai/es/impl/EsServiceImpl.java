@@ -25,7 +25,7 @@ public final class EsServiceImpl implements IEsService {
         SearchRequestAO searchRequestAO = new SearchRequestAO();
         searchRequestAO.setIndices(searchRequest.indices());
         searchRequestAO.setQueryString(searchRequest.source().toString());
-        searchRequestAO.setScrollKeepAliveMillis(searchRequest.scroll().keepAlive().getMillis());
+//        searchRequestAO.setScrollKeepAliveMillis(searchRequest.scroll().keepAlive().getMillis());
         String response = flexSdkClient.search(searchRequestAO);
         return flexSdkParseUtils.convertJsonToSearchResponse(response);
     }
