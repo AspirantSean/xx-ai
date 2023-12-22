@@ -123,6 +123,22 @@ public class ModelMetric<D extends DetectionParams,O extends OutputParams> {
      */
     protected String operatorId;
 
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public void setSourceFilters(List<String> sourceFilters) {
+        this.sourceFilters = sourceFilters;
+    }
+
+    public void setDetectionParams(D detectionParams) {
+        this.detectionParams = detectionParams;
+    }
+
+    public void setOutputParams(O outputParams) {
+        this.outputParams = outputParams;
+    }
+
     public static class DetectionConverter extends StringToObjectConverter<DetectionParams> {
 
     }
