@@ -2,8 +2,10 @@ package com.dbapp.extension.ai.es.config;
 
 
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import com.dbapp.boot.core.auth.props.FlexProperties;
 import feign.RequestInterceptor;
 import feign.Response;
+import feign.Retryer;
 import feign.codec.Decoder;
 import lombok.Data;
 import org.springframework.beans.factory.ObjectFactory;
@@ -28,20 +30,28 @@ public class FlexEsFeignConfiguration {
     public static final String BASE_VERSION_HEADER = "baseVersion";
     public static final String OP_ID_HEADER = "opId";
     public static final String CACHE_HEADER = "cache";
+    public static final String APIKEY_HEADER = "flexApiKey";
+
 
     public static String getOpId() {
         return UUID.randomUUID().toString();
     }
 
     @Bean
-    public RequestInterceptor requestInterceptor(FlexSdkConfig flexSdkConfig) {
+    public RequestInterceptor requestInterceptor(FlexSdkConfig flexSdkConfig, FlexProperties flexProperties) {
         return t -> {
             t.header(APPLICATION_HEADER, flexSdkConfig.getApp());
             t.header(BASE_VERSION_HEADER, flexSdkConfig.getBaseVersion());
             t.header(COMPONENT_HEADER, COMPONENT_VALUE);
             t.header(COMPONENT_VERSION_HEADER, flexSdkConfig.getEsConfig().getVersion());
             t.header(OP_ID_HEADER, getOpId());
+            t.header(APIKEY_HEADER, flexProperties.getApiKey());
         };
+    }
+
+    @Bean
+    public Retryer apiKeyRetryer(FlexSdkConfig flexSdkConfig){
+        return new Retryer.Default(flexSdkConfig.getPeriod(), flexSdkConfig.getMaxPeriod(), flexSdkConfig.getMaxAttempts());
     }
 
     @Profile("dev")

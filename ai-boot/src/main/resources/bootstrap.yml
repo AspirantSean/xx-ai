@@ -7,6 +7,9 @@ spring:
       discovery:
         secure: true
         namespace: ${NACOS_CONF_NAMESPACE_ID:nacosid_ailpha_zq}
+        metadata:
+          context-path: /flex-ai
+          flex: true
       username: ${NACOS_AUTH_IDENTITY_KEY:nacos}
       password: ${NACOS_AUTH_IDENTITY_VALUE:nacos}
       config:
@@ -14,6 +17,9 @@ spring:
         shared-configs:
           - data-id: common-config
             refresh: true
+          - data-id: flex-common.properties
+            refresh: true
         file-extension: yaml
+
 logging:
   config: classpath:log4j2.xml

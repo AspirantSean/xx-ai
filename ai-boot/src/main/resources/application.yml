@@ -21,7 +21,7 @@ spring:
       timeout: ${spring.redis.timeout:10000}
 server:
   servlet:
-    context-path: /ai
+    context-path: /flex-ai
     session:
       cookie:
         name: ailpha-bigdata

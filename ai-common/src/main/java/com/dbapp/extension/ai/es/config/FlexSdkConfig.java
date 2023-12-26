@@ -5,6 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.concurrent.TimeUnit;
+
 @EnableConfigurationProperties
 @Configuration
 @ConfigurationProperties(
@@ -20,6 +22,11 @@ public class FlexSdkConfig {
     private String baseVersion = "2.0";
 
     private EsConfig esConfig;
+
+    private long period = 100L;
+    private long maxPeriod = TimeUnit.SECONDS.toMillis(1L);
+
+    private int maxAttempts = 3;
 
     @Data
     public static  class EsConfig {
