@@ -19,6 +19,7 @@ spring:
             refresh: true
           - data-id: flex-common.properties
             refresh: true
+            group: COMMON_GROUP
         file-extension: yaml
 
 logging:
