@@ -2,6 +2,7 @@ package com.dbapp.extension.ai.job;
 
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
+import com.xxl.job.core.biz.client.FlexJobAdminFeignClient;
 import com.xxl.job.core.biz.model.*;
 import com.xxl.job.core.config.ExecutorProperties;
 import com.xxl.job.core.enums.ExecutorRouteStrategyEnum;
@@ -34,21 +35,12 @@ public class JobServiceImpl implements JobService {
     @Resource
     private ExecutorProperties executorProperties;
 
-    private AtomicInteger counter = new AtomicInteger();
-
-    private AdminBiz nextClient() {
-        int part = toPositive(counter.getAndIncrement()) % XxlJobExecutor.getAdminBizList().size();
-        return XxlJobExecutor.getAdminBizList().get(part);
-    }
-
-    private int toPositive(int number) {
-        return number & 0x7fffffff;
-    }
+    @Resource
+    private FlexJobAdminFeignClient flexJobAdminFeignClient;
 
     @Override
     public void deleteByHandler(String handler) {
-        AdminBiz adminBiz = nextClient();
-        ReturnT<Integer> integerReturnT = adminBiz.deleteJobsByHandler(handler);
+        ReturnT<Integer> integerReturnT = flexJobAdminFeignClient.deleteJobsByHandler(handler);
         if (integerReturnT.getCode() != 200) {
             throw new RuntimeException(integerReturnT.getMsg());
         }
@@ -57,8 +49,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void deleteByOtherKey(String otherKey) {
-        AdminBiz adminBiz = nextClient();
-        ReturnT<String> stringReturnT = adminBiz.removeJobByOtherKey(otherKey);
+        ReturnT<String> stringReturnT = flexJobAdminFeignClient.removeJobByOtherKey(otherKey);
         if (stringReturnT.getCode() != 200) {
             throw new RuntimeException(stringReturnT.getMsg());
         }
@@ -90,8 +81,7 @@ public class JobServiceImpl implements JobService {
         if (StringUtils.isBlank(jobInfo.getRegisterWay())) {
             jobInfo.setRegisterWay("restful");
         }
-        AdminBiz adminBiz = nextClient();
-        ReturnT<String> stringReturnT = adminBiz.addJob(jobInfo);
+        ReturnT<String> stringReturnT = flexJobAdminFeignClient.addJob(jobInfo);
         if (stringReturnT.getCode() != 200) {
             throw new RuntimeException(stringReturnT.getMsg());
         }
@@ -99,8 +89,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobInfoResult> getJobsByHandler(String handler) {
-        AdminBiz adminBiz = nextClient();
-        ReturnT<List<JobInfoResult>> jobsByHandler = adminBiz.getJobsByHandler(handler);
+        ReturnT<List<JobInfoResult>> jobsByHandler = flexJobAdminFeignClient.getJobsByHandler(handler);
         if (jobsByHandler.getCode() != 200) {
             throw new RuntimeException(jobsByHandler.getMsg());
         }
@@ -109,15 +98,13 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobInfoResult getJobByOtherKey(String otherKey) {
-        AdminBiz adminBiz = nextClient();
-
         QueryJobListOption queryJobListOption = new QueryJobListOption();
         List<String> otherKeys = new ArrayList<>();
         otherKeys.add(otherKey);
         queryJobListOption.setOtherKeys(otherKeys);
         queryJobListOption.setPage(new Page(1,1));
 
-        ReturnT<List<JobInfoResult>> listReturnT = adminBiz.queryJobs(queryJobListOption);
+        ReturnT<List<JobInfoResult>> listReturnT = flexJobAdminFeignClient.queryJobs(queryJobListOption);
         if (listReturnT.getCode() != 200) {
             throw new RuntimeException(listReturnT.getMsg());
         }
@@ -127,8 +114,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public boolean trigger(int id) {
-        AdminBiz adminBiz = nextClient();
-        ReturnT<String> stringReturnT = adminBiz.triggerJob(id, null, null);
+        ReturnT<String> stringReturnT = flexJobAdminFeignClient.triggerJob(id, null, null);
         if (stringReturnT.getCode() != 200) {
             throw new RuntimeException(stringReturnT.getMsg());
         }
