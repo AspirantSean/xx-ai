@@ -9,6 +9,7 @@ spring:
         metadata:
           context-path: /flex-ai
           flex: true
+        server-addr: ${spring.cloud.nacos.server-addr}
       username: ${NACOS_AUTH_IDENTITY_KEY:nacos}
       password: ${NACOS_AUTH_IDENTITY_VALUE:nacos}
       config:
@@ -20,6 +21,7 @@ spring:
             refresh: true
             group: COMMON_GROUP
         file-extension: yaml
+        server-addr: ${spring.cloud.nacos.server-addr}
 
 logging:
   config: classpath:log4j2.xml
