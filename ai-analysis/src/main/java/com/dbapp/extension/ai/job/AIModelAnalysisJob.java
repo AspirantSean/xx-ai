@@ -170,12 +170,15 @@ public class AIModelAnalysisJob {
                 }
                 this.hasAnalysedAlgorithm.add(algorithmId);
                 try {
+                    String aiCpulimit = GlobalAttribute.getPropertyString("ai_cpulimit", "100");
+                    Integer aiCpulimitNumber = Integer.valueOf(aiCpulimit);
+
+
                     Process process = Runtime.getRuntime().exec(
                             String.format("%s --limit %s %s %s %s %s %s %s %s",
-                                    GlobalAttribute.getPropertyString("cpulimit_path",
-                                            String.format("%s/../cpulimit-master/src/cpulimit", SystemProperUtil.getResourcesPath())),// cpulimit命令执行路径
-                                    GlobalAttribute.getPropertyString("ai_cpulimit", "100"),// cpulimit 限制大小
-                                    GlobalAttribute.getPropertyString("python2_executable", "python"),// Python执行路径
+                                   "cpulimit_path",// cpulimit命令执行路径
+                                    aiCpulimitNumber,// cpulimit 限制大小
+                                    "python",// Python执行路径
                                     PYTHON_PATH,// 算法脚本地址
                                     algorithmId,// 算法ID
                                     this.pythonDataCache,// 分析结果缓存地址
