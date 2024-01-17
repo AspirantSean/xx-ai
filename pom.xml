@@ -61,6 +61,10 @@
                     <groupId>com.dbapp</groupId>
                     <artifactId>ailpha-job-core</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.dbapp</groupId>
+                    <artifactId>auth-rpc</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
