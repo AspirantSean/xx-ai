@@ -42,7 +42,9 @@ ailpha:
     app: zq
     es-config:
       version: 7.17.14
-
+  auto-reload:
+    permission: false
+    meta-info: false
 
 mybatis:
   config-location: classpath:mybatis/mybatis-config.xml
@@ -51,7 +53,7 @@ mybatis:
 xxl:
   job:
     admin:
-      addresses: http://127.0.0.1:8080/xxl-job-admin
+      addresses: http://127.0.0.1:8080/flex-job
     executor:
       appname: flex-job-executor-ai
       log-path: logs/job-handler

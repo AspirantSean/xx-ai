@@ -9,7 +9,7 @@ EXPOSE 8902/tcp
 
 #prepare 准备阶段，主要是定义工作目录
 
-ADD ${package-name} /usr/hdp/20231103/app-ai/
+ADD ${package-name} /usr/hdp/20231103/flex-ai/
 
 ADD component/statsmodels.tar /usr/lib/python2.7/site-packages/
 ADD component/cpulimit /opt/
@@ -19,7 +19,7 @@ RUN ln -s /opt/cpulimit /usr/bin/cpulimit
 COPY docker/docker-entrypoint.sh /usr/local/bin/
 RUN chmod u+x /usr/local/bin/docker-entrypoint.sh
 
-WORKDIR /usr/hdp/20231103/app-ai
+WORKDIR /usr/hdp/20231103/flex-ai
 
 #用 bash /usr/local/bin/docker-entrypoint.sh 启动
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

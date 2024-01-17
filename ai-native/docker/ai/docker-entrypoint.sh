@@ -21,7 +21,7 @@ JAVA_OPTS="$JAVA_OPTS --add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-opens
 export JAVA_OPTS
 
 #进入bin的上级目录
-base='/usr/hdp/20231103/app-ai'
+base='/usr/hdp/20231103/flex-ai'
 export EXT_HOME=$base
 
 #test conf exist
