@@ -1,5 +1,5 @@
 #基础镜像部分，按照运行时进行选择
-FROM ailpha-registry:5000/ailpha-base:${tag}
+FROM ailpha-registry:5000/ailpha-base:v2.0
 
 #env 环境变量，主要定义需要人为控制的写入的环境变量
 ENV TZ=Asia/Shanghai
