@@ -1,7 +1,7 @@
 version: "3"
 services:
   ai:
-    image: ailpha-registry:5000/flex-ai:v2.0.0
+    image: ailpha-registry:5000/flex-ai:${tag}
     container_name: 1-flex-ai-1
     #加入环境变量文件 .env
     env_file:

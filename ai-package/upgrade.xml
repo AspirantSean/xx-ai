@@ -34,6 +34,23 @@
         </fileSet>
 
         <fileSet>
+            <directory>../ai-native/docker</directory>
+            <outputDirectory>docker-compose</outputDirectory>
+            <filtered>true</filtered>
+            <includes>
+                <include>docker-compose.yml</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>../ai-native/docker</directory>
+            <outputDirectory>docker-compose</outputDirectory>
+            <includes>
+                <include>midware.env</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
             <directory>../${project.name}-boot/src/main/resources</directory>
             <outputDirectory>config_update</outputDirectory>
             <includes>
