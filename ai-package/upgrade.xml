@@ -32,5 +32,13 @@
                 <include>Dockerfile</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>../${project.name}-boot/src/main/resources</directory>
+            <outputDirectory>config_update</outputDirectory>
+            <includes>
+                <include>application.yml</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>

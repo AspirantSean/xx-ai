@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+/usr/local/bin/nacos.sh
+
 export PATH=$JAVA_HOME/bin:$PATH
 export PATH=/sbin:$PATH
 export PATH=/usr/sbin:$PATH

@@ -13,11 +13,11 @@ services:
         limits:
           memory:  6G
     healthcheck:
-      test: curl -fs http://localhost:8902/api/healthy || exit 1
+      test: curl -fs http://localhost:8902/flex-ai/api/healthy || exit 1
       interval: 30s
       timeout: 5s
       retries: 20
-    hostname: 1-ai-1
+    hostname: 1-flex-ai-1
     volumes:
       - /data/1-flex-ai-1/logs:/usr/hdp/20231103/flex-ai/logs
       - /data/1-flex-ai-1/data:/data

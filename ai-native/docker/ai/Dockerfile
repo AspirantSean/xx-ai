@@ -13,11 +13,15 @@ ADD ${package-name} /usr/hdp/20231103/flex-ai/
 
 ADD component/statsmodels.tar /usr/lib/python2.7/site-packages/
 ADD component/cpulimit /opt/
-RUN ln -s /opt/cpulimit /usr/bin/cpulimit
-
-#runner 启动脚本部分呢，主要定义启动脚本相关参数
+COPY config_update /usr/local/config_update
 COPY docker/docker-entrypoint.sh /usr/local/bin/
-RUN chmod u+x /usr/local/bin/docker-entrypoint.sh
+COPY docker/nacos.sh /usr/local/bin/
+
+
+RUN ln -s /opt/cpulimit /usr/bin/cpulimit \
+    && chmod u+x /usr/local/bin/docker-entrypoint.sh \
+    && chmod u+x /usr/local/bin/nacos.sh
+
 
 WORKDIR /usr/hdp/20231103/flex-ai
 
