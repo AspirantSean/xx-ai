@@ -34,7 +34,7 @@ server:
 ailpha:
   datasource:
     type: postgresql
-    jdbc-url: jdbc:postgresql://${ailpha.default.pg.host:10.70.70.85}:${ailpha.default.pg.host:5432}/ailpha?currentSchema=ai&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull
+    jdbc-url: jdbc:postgresql://${ailpha.default.pg.host:1-postgresql-1}:${ailpha.default.pg.host:5432}/ailpha?currentSchema=ai&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull
     username: ${ailpha.default.pg.username:dbapp}
     password: ${ailpha.default.pg.password:jY%kng8cc&}
     driver-class-name: org.postgresql.Driver
@@ -53,7 +53,7 @@ mybatis:
 xxl:
   job:
     admin:
-      addresses: http://${flex.job.service.host:127.0.0.1:8080}/flex-job
+      addresses: http://${flex.job.service.host:1-flex-job-1:8080}/flex-job
     executor:
       appname: flex-job-executor-ai
       log-path: logs/job-handler
