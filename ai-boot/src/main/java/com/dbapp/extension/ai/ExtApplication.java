@@ -21,10 +21,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 public class ExtApplication {
 
-    static {
-        Log4j2Util.setLog4j2Context();
-    }
-
     public static void main(String[] args) {
         try {
             SpringApplication application = new SpringApplication(ExtApplication.class);
