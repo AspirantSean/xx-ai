@@ -6,7 +6,7 @@ import com.dbapp.flexsdk.nativees.action.search.SearchResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-@FeignClient(name = "flex-sdk", configuration = FlexEsFeignConfiguration.class)
+@FeignClient(name = "flex-sdk", configuration = FlexEsFeignConfiguration.class,path = "/flex-sdk")
 public interface FlexSdkClient {
 
 
