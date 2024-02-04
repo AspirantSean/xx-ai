@@ -176,7 +176,7 @@ public class AIModelAnalysisJob {
 
                     Process process = Runtime.getRuntime().exec(
                             String.format("%s --limit %s %s %s %s %s %s %s %s",
-                                   "cpulimit_path",// cpulimit命令执行路径
+                                   "cpulimit",// cpulimit命令执行路径
                                     aiCpulimitNumber,// cpulimit 限制大小
                                     "python",// Python执行路径
                                     PYTHON_PATH,// 算法脚本地址
