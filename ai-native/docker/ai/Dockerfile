@@ -11,7 +11,8 @@ EXPOSE 8902/tcp
 
 ADD ${package-name} /usr/hdp/20231103/flex-ai/
 
-ADD component/statsmodels.tar /usr/lib/python2.7/site-packages/
+ADD component/python2.7.tar.gz /usr/hdp/20231103/flex-ai/
+ADD component/statsmodels.tar /usr/hdp/20231103/flex-ai/python2.7/lib/python2.7/site-packages/
 ADD component/cpulimit /opt/
 COPY config_update /usr/local/config_update
 COPY docker/docker-entrypoint.sh /usr/local/bin/

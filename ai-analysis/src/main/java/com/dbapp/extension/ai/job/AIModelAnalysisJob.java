@@ -35,6 +35,7 @@ public class AIModelAnalysisJob {
     private static final String ALGORITHM_CONF_PATH = String.format("%s/ai_model_ailpha/config/ai_algorithm.properties", SystemProperUtil.getResourcesPath());
     private static final String PYTHON_PATH = String.format("%s/ai_model_ailpha/Analysis.py", SystemProperUtil.getResourcesPath());
     private static final String CACHE_PATH = GlobalAttribute.getPropertyString("tmp.dir", "/data/tmp");
+    private static final String PYTHON_EXECUTE = "/usr/hdp/20231103/flex-ai/python2.7/bin/python";
 
     @Resource
     private AIAnomalyAnalysisMapper aiAnomalyAnalysisMapper;
@@ -178,7 +179,7 @@ public class AIModelAnalysisJob {
                             String.format("%s --limit %s %s %s %s %s %s %s %s",
                                    "cpulimit",// cpulimit命令执行路径
                                     aiCpulimitNumber,// cpulimit 限制大小
-                                    "python",// Python执行路径
+                                    PYTHON_EXECUTE,// Python执行路径
                                     PYTHON_PATH,// 算法脚本地址
                                     algorithmId,// 算法ID
                                     this.pythonDataCache,// 分析结果缓存地址
