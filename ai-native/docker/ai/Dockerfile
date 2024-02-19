@@ -21,7 +21,8 @@ COPY docker/nacos.sh /usr/local/bin/
 
 RUN ln -s /opt/cpulimit /usr/bin/cpulimit \
     && chmod u+x /usr/local/bin/docker-entrypoint.sh \
-    && chmod u+x /usr/local/bin/nacos.sh
+    && chmod u+x /usr/local/bin/nacos.sh \
+    && chmod u+x /opt/cpulimit
 
 
 WORKDIR /usr/hdp/20231103/flex-ai
