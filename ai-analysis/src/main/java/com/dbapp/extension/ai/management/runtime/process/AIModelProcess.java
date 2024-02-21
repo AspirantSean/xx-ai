@@ -246,7 +246,7 @@ public class AIModelProcess {
         long pid = -1;
         Field field;
         if (Platform.isLinux() || Platform.isMac() || Platform.isAIX()) {
-            Class<?> clazz = Class.forName("java.lang.UNIXProcess");
+            Class<?> clazz = process.getClass();
             field = clazz.getDeclaredField("pid");
             field.setAccessible(true);
             pid = (Integer) field.get(process);
