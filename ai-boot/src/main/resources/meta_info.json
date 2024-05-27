@@ -1,8 +1,8 @@
 {
     "code":"ai",
-    "component":"ai",
     "name":"ai server",
     "description":"ai server",
     "version":"${tag}",
-    "type":"backend"
+    "group": "flex",
+    "contentPath": "/flex-ai"
 }
