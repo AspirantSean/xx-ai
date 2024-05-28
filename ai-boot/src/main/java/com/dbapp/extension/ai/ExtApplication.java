@@ -19,6 +19,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(scanBasePackages = "com.dbapp.**")
 @EnableAsync
 @Slf4j
+@EnableScheduling
 public class ExtApplication {
 
     public static void main(String[] args) {
