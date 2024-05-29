@@ -1,5 +1,5 @@
 {
-    "code":"ai",
+    "code":"flex-ai",
     "name":"ai server",
     "description":"ai server",
     "version":"${tag}",
