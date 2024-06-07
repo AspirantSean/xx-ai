@@ -47,6 +47,8 @@ ailpha:
   auto-reload:
     permission: false
     meta-info: false
+  product:
+    lang: ${ailpha.config.product.lang:en_US}
 devops_rpc_server: ${DEVOPS_API_SERVER:http://ailpha-init:8000}
 mybatis:
   config-location: classpath:mybatis/mybatis-config.xml
