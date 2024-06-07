@@ -5,7 +5,6 @@ import com.dbapp.extension.ai.job.JobService;
 import com.dbapp.extension.ai.management.runtime.process.AIModelProcess;
 import com.dbapp.extension.ai.mapper.AIAnomalyAnalysisMapper;
 import com.dbapp.extension.ai.utils.GlobalAttribute;
-import com.dbapp.extension.ai.utils.I18nUtil;
 import com.dbapp.extension.mirror.dto.AIModel;
 import com.xxl.job.core.biz.model.JobInfoResult;
 import com.xxl.job.core.biz.model.RegistryJobParam;
@@ -66,9 +65,9 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
             }
             jobService.deleteByOtherKey("ai-server-polling-job");
             RegistryJobParam jobInfo = new RegistryJobParam();
-            jobInfo.setJobName(I18nUtil.getMessage("ai.job.polling-job"));
+            jobInfo.setJobName("ai服务定时拉取模型任务");
             jobInfo.setExecutorHandler("ai-server-polling-job");
-            jobInfo.setJobDesc(I18nUtil.getMessage("ai.job.polling-job.desc"));
+            jobInfo.setJobDesc("ai服务定时拉取模型，并更新现有ai模型任务");
             jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE.name());
             jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW.name());
             jobInfo.setScheduleConf(IntervalUnit.valueOf(intervalUnit).translateToSecond(interval) + "");
@@ -222,9 +221,9 @@ public final class AIModelManager implements ApplicationListener<ApplicationRead
 
     private void addAiModelJob(AIModelProcess aiModelProcess) {
         RegistryJobParam jobInfo = new RegistryJobParam();
-        jobInfo.setJobName(I18nUtil.getMessage("ai.job.executor-job"));
+        jobInfo.setJobName("ai服务模型定时任务");
         jobInfo.setExecutorHandler("ai-server-executor-job");
-        jobInfo.setJobDesc(I18nUtil.getMessage("ai.job.executor-job.desc"));
+        jobInfo.setJobDesc("ai服务定时执行ai模型");
         jobInfo.setScheduleType(ScheduleTypeEnum.FIX_RATE.name());
         jobInfo.setMisfireStrategy(MisfireStrategyEnum.FIRE_ONCE_NOW.name());
         jobInfo.setScheduleConf(aiModelProcess.getIntervalUnit().translateToSecond(aiModelProcess.getInterval()) + "");

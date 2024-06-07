@@ -19,8 +19,6 @@ spring:
       password: ${spring.redis.password:yz2D&6gNK7}
       database: ${spring.redis.database:6}
       timeout: ${spring.redis.timeout:10000}
-  messages:
-    basename: ${ailpha.config.message.basename:i18n/ai}
 server:
   servlet:
     context-path: /flex-ai
