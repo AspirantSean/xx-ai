@@ -25,6 +25,19 @@
                 </includes>
             </unpackOptions>
         </dependencySet>
+        <dependencySet>
+            <outputDirectory>conf</outputDirectory>
+            <unpack>true</unpack>
+            <scope>runtime</scope>
+            <includes>
+                <include>com.dbapp.extension.ai:ai-*</include>
+            </includes>
+            <unpackOptions>
+                <includes>
+                    <include>i18n/**</include>
+                </includes>
+            </unpackOptions>
+        </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
