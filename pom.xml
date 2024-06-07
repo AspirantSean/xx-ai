@@ -19,7 +19,7 @@
         <ailpha-flex-job.version>1.0.1-SNAPSHOT</ailpha-flex-job.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jna.version>5.13.0</jna.version>
-        <ailpha-spring-boot-starter.version>5.3.0-das-auth-SNAPSHOT</ailpha-spring-boot-starter.version>
+        <ailpha-spring-boot-starter.version>5.3.0-das-auth-i18n-SNAPSHOT</ailpha-spring-boot-starter.version>
         <flex-nativees.version>1.0-SNAPSHOT</flex-nativees.version>
     </properties>
     <modules>
