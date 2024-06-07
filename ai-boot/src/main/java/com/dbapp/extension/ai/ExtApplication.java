@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @Description 启动类
  * @Version 1.0-SNAPSHOT
  **/
-@EnableFeignClients(basePackages = {"com.dbapp.**.rpc","com.xxl.job.core.biz.client"})
+@EnableFeignClients(basePackages = {"com.dbapp.**.rpc","com.xxl.job.core.biz.client","com.dbapp.boot.core.resource.client"})
 @SpringBootApplication(scanBasePackages = "com.dbapp.**")
 @EnableAsync
 @Slf4j
