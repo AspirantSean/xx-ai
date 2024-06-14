@@ -22,6 +22,8 @@ spring:
             group: COMMON_GROUP
         file-extension: yaml
         server-addr: ${spring.cloud.nacos.server-addr}
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   config: classpath:logback.xml

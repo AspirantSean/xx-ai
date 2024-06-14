@@ -19,8 +19,6 @@ spring:
       password: yz2D&6gNK7
       database: 6
       timeout: 10000
-  main:
-    allow-bean-definition-overriding: true
 server:
   servlet:
     context-path: /ai
